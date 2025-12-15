@@ -9,7 +9,7 @@ import (
 )
 
 func Run(cfg *config.Config, router *gin.Engine) {
-	router.Run(fmt.Sprintf(":%s", cfg.ServerPort))
+	router.Run(fmt.Sprintf(":%d", cfg.ServerPort))
 }
 
 func SetupRoute(cfg *config.Config, db *gorm.DB) {

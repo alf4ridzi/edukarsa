@@ -21,3 +21,16 @@ func CreateAccessToken(user *models.User, secret string, expired int) (string, e
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString(secret)
 }
+
+func RefreshAccessToken(user *models.User, secret string, expired int) (string, error) {
+	exp := time.Now().Add(time.Hour * time.Duration(expired))
+	claims := &models.JwtClaims{
+		RegisteredClaims: jwt.RegisteredClaims{
+			Subject:   strconv.FormatUint(uint64(user.ID), 10),
+			ExpiresAt: jwt.NewNumericDate(exp),
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	return token.SignedString(secret)
+}

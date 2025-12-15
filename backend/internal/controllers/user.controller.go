@@ -60,7 +60,6 @@ func (c *UserController) Register(ctx *gin.Context) {
 		return
 	}
 
-	// maks 5 detik
 	reqCtx, cancel := context.WithTimeout(ctx.Request.Context(), 5*time.Second)
 	defer cancel()
 

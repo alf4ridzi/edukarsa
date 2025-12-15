@@ -1,39 +1,27 @@
 package config
 
-import (
-	"os"
-
-	"github.com/joho/godotenv"
-)
+import "github.com/spf13/viper"
 
 type Config struct {
-	ServerPort    string
-	DBHost        string
-	DBName        string
-	DBUser        string
-	DBPassword    string
-	DBPort        string
-	SessionSecret string
+	ServerPort    int    `mapstructure:"SERVER_PORT"`
+	DBHost        string `mapstructure:"DB_HOST"`
+	DBName        string `mapstructure:"DB_NAME"`
+	DBUser        string `mapstructure:"DB_USER"`
+	DBPassword    string `mapstructure:"DB_PASSWORD"`
+	DBPort        int    `mapstructure:"DB_PORT"`
+	AccessSecret  string `mapstructure:"ACCESS_SECRET"`
+	RefreshSecret string `mapstructure:"REFRESH_SECRET"`
 }
 
 func LoadConfig() (*Config, error) {
-	godotenv.Load()
+	config := Config{}
+	viper.SetConfigFile(".env")
 
-	return &Config{
-		ServerPort:    getEnv("SERVER_PORT", "8080"),
-		DBHost:        getEnv("DB_HOST", "localhost"),
-		DBName:        getEnv("DB_NAME", "edukarsa"),
-		DBUser:        getEnv("DB_USER", "root"),
-		DBPassword:    getEnv("DB_PASSWORD", ""),
-		DBPort:        getEnv("DB_PORT", "5432"),
-		SessionSecret: getEnv("SESSION_SECRET", "abcdefg"),
-	}, nil
-}
-
-func getEnv(key, defaultValue string) string {
-	if value, exist := os.LookupEnv(key); exist {
-		return value
+	err := viper.ReadInConfig()
+	if err != nil {
+		return nil, err
 	}
 
-	return defaultValue
+	err = viper.Unmarshal(&config)
+	return &config, err
 }
