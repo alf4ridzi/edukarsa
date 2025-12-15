@@ -7,8 +7,8 @@ import (
 type User struct {
 	gorm.Model
 	Name     string
-	Email    string
-	Username string
+	Email    string `gorm:"uniqueIndex:idx_email;size:50"`
+	Username string `gorm:"uniqueIndex:idx_username;size:100"`
 	Password string
 }
 
@@ -18,4 +18,9 @@ type RegisterUser struct {
 	Username        string `json:"username"`
 	Password        string `json:"password"`
 	ConfirmPassword string `json:"confirmpassword"`
+}
+
+type Login struct {
+	Identifier string `json:"identifier"`
+	Password   string `json:"password"`
 }

@@ -5,10 +5,14 @@ import (
 	"edukarsa-backend/internal/domain/models"
 	"edukarsa-backend/internal/repositories"
 	"edukarsa-backend/internal/utils"
+	"net/mail"
+
+	"gorm.io/gorm"
 )
 
 type UserService interface {
 	Register(ctx context.Context, reg *models.RegisterUser) error
+	Login(ctx context.Context, reg *models.Login) error
 }
 
 type userServiceImpl struct {
@@ -20,7 +24,6 @@ func NewUserService(repo repositories.UserRepo) UserService {
 }
 
 func (s *userServiceImpl) Register(ctx context.Context, reg *models.RegisterUser) error {
-
 	usernameExist, err := s.repo.ExistByUsername(ctx, reg.Username)
 	if err != nil {
 		return err
@@ -53,4 +56,30 @@ func (s *userServiceImpl) Register(ctx context.Context, reg *models.RegisterUser
 	user.Password = hashPass
 
 	return s.repo.Create(ctx, user)
+}
+
+func (s *userServiceImpl) Login(ctx context.Context, reg *models.Login) error {
+	var user *models.User
+	var err error
+
+	_, err = mail.ParseAddress(reg.Identifier)
+	if err == nil {
+		user, err = s.repo.FindByEmail(ctx, reg.Identifier)
+	} else {
+		user, err = s.repo.FindByUsername(ctx, reg.Identifier)
+	}
+
+	if err != nil {
+		return err
+	}
+
+	if user == nil {
+		return gorm.ErrRecordNotFound
+	}
+
+	if !utils.ValidatePasswordBcrypt(reg.Password, user.Password) {
+		return models.ErrWrongPassword
+	}
+
+	return nil
 }
