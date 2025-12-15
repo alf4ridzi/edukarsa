@@ -6,6 +6,8 @@ import (
 
 type User struct {
 	gorm.Model
+	RoleID   uint
+	Role     Role `json:"role"`
 	Name     string
 	Email    string `gorm:"uniqueIndex:idx_email;size:50"`
 	Username string `gorm:"uniqueIndex:idx_username;size:100"`
