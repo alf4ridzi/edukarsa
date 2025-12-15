@@ -27,6 +27,15 @@ func ConnectDB(cfg *config.Config) (*gorm.DB, error) {
 	return db, err
 }
 
+func Close(db *gorm.DB) error {
+	sqlDB, err := db.DB()
+	if err != nil {
+		return err
+	}
+
+	return sqlDB.Close()
+}
+
 func Migrate(db *gorm.DB) error {
 	return db.AutoMigrate(&models.User{})
 }

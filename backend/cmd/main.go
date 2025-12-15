@@ -18,6 +18,8 @@ func main() {
 		log.Fatal(err)
 	}
 
+	defer postgresql.Close(db)
+
 	if err := postgresql.Migrate(db); err != nil {
 		log.Fatal(err)
 	}
