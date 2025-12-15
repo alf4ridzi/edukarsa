@@ -22,5 +22,5 @@ func main() {
 		log.Fatal(err)
 	}
 
-	routes.Setup(cfg, db)
+	routes.SetupRoute(cfg, db)
 }
