@@ -12,7 +12,7 @@ import (
 
 type UserService interface {
 	Register(ctx context.Context, reg *models.RegisterUser) error
-	Login(ctx context.Context, reg *models.Login) error
+	Login(ctx context.Context, reg *models.Login) (*models.User, error)
 }
 
 type userServiceImpl struct {
@@ -58,7 +58,7 @@ func (s *userServiceImpl) Register(ctx context.Context, reg *models.RegisterUser
 	return s.repo.Create(ctx, user)
 }
 
-func (s *userServiceImpl) Login(ctx context.Context, reg *models.Login) error {
+func (s *userServiceImpl) Login(ctx context.Context, reg *models.Login) (*models.User, error) {
 	var user *models.User
 	var err error
 
@@ -70,16 +70,16 @@ func (s *userServiceImpl) Login(ctx context.Context, reg *models.Login) error {
 	}
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if user == nil {
-		return gorm.ErrRecordNotFound
+		return nil, gorm.ErrRecordNotFound
 	}
 
 	if !utils.ValidatePasswordBcrypt(reg.Password, user.Password) {
-		return models.ErrWrongPassword
+		return nil, models.ErrWrongPassword
 	}
 
-	return nil
+	return user, nil
 }

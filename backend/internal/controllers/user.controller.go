@@ -2,9 +2,11 @@ package controllers
 
 import (
 	"context"
+	"edukarsa-backend/internal/config"
 	"edukarsa-backend/internal/domain/models"
 	"edukarsa-backend/internal/helpers"
 	"edukarsa-backend/internal/services"
+	"edukarsa-backend/internal/utils"
 	"net/http"
 	"time"
 
@@ -14,10 +16,11 @@ import (
 
 type UserController struct {
 	service services.UserService
+	cfg     *config.Config
 }
 
-func NewUserController(service services.UserService) *UserController {
-	return &UserController{service: service}
+func NewUserController(service services.UserService, cfg *config.Config) *UserController {
+	return &UserController{service: service, cfg: cfg}
 }
 
 func (c *UserController) Login(ctx *gin.Context) {
@@ -27,17 +30,17 @@ func (c *UserController) Login(ctx *gin.Context) {
 		return
 	}
 
-	reqCtx, cancel := context.WithTimeout(ctx.Request.Context(), 5*time.Second)
+	reqCtx, cancel := context.WithTimeout(ctx.Request.Context(), 2*time.Second)
 	defer cancel()
 
-	err := c.service.Login(reqCtx, &reg)
+	user, err := c.service.Login(reqCtx, &reg)
 
 	if err != nil {
 		switch err {
 		case models.ErrWrongPassword:
-			helpers.ResponseJSON(ctx, http.StatusNotFound, false, "username/email/password salah", nil)
+			helpers.ResponseJSON(ctx, http.StatusUnauthorized, false, "username/email/password salah", nil)
 		case gorm.ErrRecordNotFound:
-			helpers.ResponseJSON(ctx, http.StatusNotFound, false, "username/email/password salah", nil)
+			helpers.ResponseJSON(ctx, http.StatusUnauthorized, false, "username/email/password salah", nil)
 		default:
 			helpers.InternalServerError(ctx, "internal server error")
 		}
@@ -45,7 +48,26 @@ func (c *UserController) Login(ctx *gin.Context) {
 		return
 	}
 
-	helpers.OK(ctx, "berhasil login", nil)
+	accessToken, err := utils.CreateAccessToken(user, c.cfg.AccessSecret, c.cfg.AccessTokenExpired)
+	if err != nil {
+		helpers.InternalServerError(ctx, "internal server error")
+		return
+	}
+
+	refreshToken, err := utils.CreateRefreshToken(user, c.cfg.RefreshSecret, c.cfg.RefreshTokenExpired)
+	if err != nil {
+		helpers.InternalServerError(ctx, "internal server error")
+		return
+	}
+
+	data := map[string]models.TokenResponse{
+		"token": {
+			Access:  accessToken,
+			Refresh: refreshToken,
+		},
+	}
+
+	helpers.OK(ctx, "berhasil login", data)
 }
 
 func (c *UserController) Register(ctx *gin.Context) {
@@ -60,7 +82,7 @@ func (c *UserController) Register(ctx *gin.Context) {
 		return
 	}
 
-	reqCtx, cancel := context.WithTimeout(ctx.Request.Context(), 5*time.Second)
+	reqCtx, cancel := context.WithTimeout(ctx.Request.Context(), 2*time.Second)
 	defer cancel()
 
 	err := c.service.Register(reqCtx, &reg)

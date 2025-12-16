@@ -13,7 +13,7 @@ import (
 func NewUserRoutes(route *gin.RouterGroup, cfg *config.Config, db *gorm.DB) {
 	userRepo := repositories.NewUserRepo(db)
 	userService := services.NewUserService(userRepo)
-	userController := controllers.NewUserController(userService)
+	userController := controllers.NewUserController(userService, cfg)
 
 	auth := route.Group("/auth")
 	{
