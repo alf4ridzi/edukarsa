@@ -1,6 +1,7 @@
 package middlewares
 
 import (
+	"log"
 	"net/http"
 	"strings"
 
@@ -28,5 +29,5 @@ func AuthMiddleware(ctx *gin.Context) {
 	}
 
 	tokenStr := parts[1]
-
+	log.Println(tokenStr)
 }
