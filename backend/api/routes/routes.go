@@ -16,7 +16,7 @@ func SetupRoute(cfg *config.Config, db *gorm.DB) {
 	route := gin.Default()
 
 	public := route.Group("/api")
-	NewUserRoutes(public, cfg, db)
+	NewAuthRoutes(public, cfg, db)
 
 	Run(cfg, route)
 }
