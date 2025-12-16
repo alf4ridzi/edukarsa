@@ -21,7 +21,8 @@ func AuthMiddleware(ctx *gin.Context) {
 	parts := strings.Split(authHeader, " ")
 	if len(parts) != 2 || parts[0] != "Bearer" {
 		ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-			"error": "invalid authorization format",
+			"status":  false,
+			"message": "no authorization header",
 		})
 		return
 	}
