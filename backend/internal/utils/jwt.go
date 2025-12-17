@@ -70,7 +70,7 @@ func ValidateAccessToken(tokenJwt string) (*JwtAccessClaims, error) {
 func ValidateRefreshToken(tokenJwt string) (*JwtRefreshclaims, error) {
 	token, err := jwt.ParseWithClaims(
 		tokenJwt,
-		&JwtAccessClaims{},
+		&JwtRefreshclaims{},
 		func(t *jwt.Token) (any, error) {
 			return []byte(config.AppConfig.RefreshSecret), nil
 		},

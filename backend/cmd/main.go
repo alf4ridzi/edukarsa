@@ -20,7 +20,7 @@ func main() {
 
 	config.AppConfig = cfg
 
-	db, err := postgresql.ConnectDB(cfg)
+	db, err := postgresql.ConnectDB()
 	if err != nil {
 		log.Fatal(err)
 	}

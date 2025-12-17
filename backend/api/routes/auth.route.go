@@ -18,6 +18,6 @@ func NewAuthRoutes(route *gin.RouterGroup, db *gorm.DB) {
 	{
 		auth.POST("/login", userController.Login)
 		auth.POST("/register", userController.Register)
-		auth.GET("/refresh", userController.Refresh)
+		auth.POST("/refresh", userController.Refresh)
 	}
 }

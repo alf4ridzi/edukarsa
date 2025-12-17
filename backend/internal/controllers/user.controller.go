@@ -7,7 +7,7 @@ import (
 	"edukarsa-backend/internal/services"
 	"edukarsa-backend/internal/utils"
 	"net/http"
-	"strings"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -23,31 +23,28 @@ func NewUserController(service services.UserService) *UserController {
 }
 
 func (c *UserController) Refresh(ctx *gin.Context) {
+	var req models.RefreshRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		helpers.ResponseJSON(ctx, http.StatusBadRequest, false, "refresh token required", nil)
+		return
+	}
+
 	reqCtx, cancel := context.WithTimeout(ctx.Request.Context(), 2*time.Second)
 	defer cancel()
 
-	authHeader := ctx.GetHeader("Authorization")
-
-	if authHeader == "" {
-		helpers.ResponseJSON(ctx, http.StatusUnauthorized, false, "no authorization header", nil)
-		return
-	}
-
-	parts := strings.Split(authHeader, " ")
-	if len(parts) != 2 || parts[0] != "Bearer" {
-		helpers.ResponseJSON(ctx, http.StatusUnauthorized, false, "no token", nil)
-		return
-	}
-
-	tokenStr := parts[1]
-
-	claims, err := utils.ValidateRefreshToken(tokenStr)
+	claims, err := utils.ValidateRefreshToken(req.RefreshToken)
 	if err != nil {
-		helpers.InternalServerError(ctx, "token invalid/expired")
+		helpers.InternalServerError(ctx, "token invalid/expired : "+err.Error())
 		return
 	}
 
-	user, err := c.service.FindByID(reqCtx, claims.Subject)
+	userID, err := strconv.ParseUint(claims.Subject, 10, 64)
+	if err != nil {
+		helpers.ResponseJSON(ctx, http.StatusUnauthorized, false, "invalid token subject", nil)
+		return
+	}
+
+	user, err := c.service.FindByID(reqCtx, userID)
 	if err != nil {
 		helpers.InternalServerError(ctx, "internal server error")
 		return
