@@ -1,6 +1,9 @@
 root = "."
 tmp_dir = "tmp"
 
+polling = true
+polling_interval = 500
+
 [build]
 cmd = "go build -o ./tmp/main ./cmd/."
 
@@ -11,9 +14,6 @@ include_ext = ["go", "tpl", "tmpl", "html"]
 exclude_dir = ["assets", "tmp", "vendor", "frontend/node_modules"]
 
 exclude_regex = ["_test\\.go"]
-
-polling = true
-polling_interval = 500
 
 [color]
 main = "magenta"
