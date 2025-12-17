@@ -7,8 +7,7 @@ import (
 )
 
 func (s Seed) UserSeed() error {
-	for i := 0; i < 100; i++ {
-
+	for range 100 {
 		user := models.User{
 			RoleID:   1,
 			Name:     faker.Name(),
