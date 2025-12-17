@@ -72,7 +72,7 @@ func ValidateRefreshToken(tokenJwt string) (*JwtRefreshclaims, error) {
 		tokenJwt,
 		&JwtAccessClaims{},
 		func(t *jwt.Token) (any, error) {
-			return []byte(config.AppConfig.AccessSecret), nil
+			return []byte(config.AppConfig.RefreshSecret), nil
 		},
 		jwt.WithValidMethods([]string{"HS256"}),
 	)

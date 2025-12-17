@@ -12,6 +12,9 @@ exclude_dir = ["assets", "tmp", "vendor", "frontend/node_modules"]
 
 exclude_regex = ["_test\\.go"]
 
+polling = true
+polling_interval = 500
+
 [color]
 main = "magenta"
 watcher = "cyan"
