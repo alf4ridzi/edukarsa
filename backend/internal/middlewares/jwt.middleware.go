@@ -1,7 +1,7 @@
 package middlewares
 
 import (
-	"log"
+	"edukarsa-backend/internal/utils"
 	"net/http"
 	"strings"
 
@@ -29,5 +29,17 @@ func AuthMiddleware(ctx *gin.Context) {
 	}
 
 	tokenStr := parts[1]
-	log.Println(tokenStr)
+
+	claims, err := utils.ValidateAccessToken(tokenStr)
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+			"status":  false,
+			"message": "invalid or expired token",
+		})
+		return
+	}
+
+	ctx.Set("user_id", claims.Subject)
+	ctx.Set("role", claims.Role)
+	ctx.Next()
 }

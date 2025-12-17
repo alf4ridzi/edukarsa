@@ -2,12 +2,12 @@ package controllers
 
 import (
 	"context"
-	"edukarsa-backend/internal/config"
 	"edukarsa-backend/internal/domain/models"
 	"edukarsa-backend/internal/helpers"
 	"edukarsa-backend/internal/services"
 	"edukarsa-backend/internal/utils"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -16,11 +16,59 @@ import (
 
 type UserController struct {
 	service services.UserService
-	cfg     *config.Config
 }
 
-func NewUserController(service services.UserService, cfg *config.Config) *UserController {
-	return &UserController{service: service, cfg: cfg}
+func NewUserController(service services.UserService) *UserController {
+	return &UserController{service: service}
+}
+
+func (c *UserController) Refresh(ctx *gin.Context) {
+	reqCtx, cancel := context.WithTimeout(ctx.Request.Context(), 2*time.Second)
+	defer cancel()
+
+	authHeader := ctx.GetHeader("Authorization")
+
+	if authHeader == "" {
+		helpers.ResponseJSON(ctx, http.StatusUnauthorized, false, "no authorization header", nil)
+		return
+	}
+
+	parts := strings.Split(authHeader, " ")
+	if len(parts) != 2 || parts[0] != "Bearer" {
+		helpers.ResponseJSON(ctx, http.StatusUnauthorized, false, "no token", nil)
+		return
+	}
+
+	tokenStr := parts[1]
+
+	claims, err := utils.ValidateRefreshToken(tokenStr)
+	if err != nil {
+		helpers.InternalServerError(ctx, "token invalid/expired")
+		return
+	}
+
+	user, err := c.service.FindByID(reqCtx, claims.Subject)
+	if err != nil {
+		helpers.InternalServerError(ctx, "internal server error")
+		return
+	}
+
+	if user == nil {
+		helpers.ResponseJSON(ctx, http.StatusUnauthorized, false, "user tidak ada", nil)
+		return
+	}
+
+	accessToken, err := utils.CreateAccessToken(user.ID, user.Role.Name)
+	if err != nil {
+		helpers.InternalServerError(ctx, "internal server error")
+		return
+	}
+
+	data := map[string]string{
+		"token": accessToken,
+	}
+
+	helpers.OK(ctx, "ok", data)
 }
 
 func (c *UserController) Login(ctx *gin.Context) {
@@ -48,13 +96,13 @@ func (c *UserController) Login(ctx *gin.Context) {
 		return
 	}
 
-	accessToken, err := utils.CreateAccessToken(user.ID, user.Role.Name, c.cfg.AccessSecret, c.cfg.AccessTokenExpired)
+	accessToken, err := utils.CreateAccessToken(user.ID, user.Role.Name)
 	if err != nil {
 		helpers.InternalServerError(ctx, "internal server error")
 		return
 	}
 
-	refreshToken, err := utils.CreateRefreshToken(user.ID, c.cfg.RefreshSecret, c.cfg.RefreshTokenExpired)
+	refreshToken, err := utils.CreateRefreshToken(user.ID)
 	if err != nil {
 		helpers.InternalServerError(ctx, "internal server error")
 		return
@@ -101,4 +149,8 @@ func (c *UserController) Register(ctx *gin.Context) {
 	}
 
 	helpers.ResponseJSON(ctx, http.StatusOK, true, "berhasil register", nil)
+}
+
+func (c *UserController) GetUser(ctx *gin.Context) {
+
 }

@@ -15,6 +15,9 @@ type Config struct {
 	RefreshTokenExpired int    `mapstructure:"REFRESH_TOKEN_EXPIRED"`
 }
 
+// global
+var AppConfig *Config
+
 func LoadConfig() (*Config, error) {
 	config := Config{}
 	viper.SetConfigFile(".env")

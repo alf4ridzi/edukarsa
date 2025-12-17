@@ -2,6 +2,7 @@ package routes
 
 import (
 	"edukarsa-backend/internal/config"
+	"edukarsa-backend/internal/middlewares"
 	"fmt"
 
 	"github.com/gin-gonic/gin"
@@ -16,7 +17,11 @@ func SetupRoute(cfg *config.Config, db *gorm.DB) {
 	route := gin.Default()
 
 	public := route.Group("/api")
-	NewAuthRoutes(public, cfg, db)
+	NewAuthRoutes(public, db)
 
+	private := route.Group("/api")
+	private.Use(middlewares.AuthMiddleware)
+
+	NewUserRoutes(private, db)
 	Run(cfg, route)
 }

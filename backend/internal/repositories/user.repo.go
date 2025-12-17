@@ -13,6 +13,7 @@ type UserRepo interface {
 	ExistByEmail(ctx context.Context, email string) (bool, error)
 	FindByUsername(ctx context.Context, username string) (*models.User, error)
 	FindByEmail(ctx context.Context, email string) (*models.User, error)
+	FindByID(ctx context.Context, id string) (*models.User, error)
 }
 
 type userRepoImpl struct {
@@ -21,6 +22,12 @@ type userRepoImpl struct {
 
 func NewUserRepo(db *gorm.DB) UserRepo {
 	return &userRepoImpl{DB: db}
+}
+
+func (r *userRepoImpl) FindByID(ctx context.Context, id string) (*models.User, error) {
+	var user models.User
+	err := r.DB.WithContext(ctx).Find(&user, "id = ?", id).Error
+	return &user, err
 }
 
 func (r *userRepoImpl) Create(ctx context.Context, user models.User) error {

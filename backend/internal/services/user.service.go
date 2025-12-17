@@ -13,6 +13,7 @@ import (
 type UserService interface {
 	Register(ctx context.Context, reg *models.RegisterUser) error
 	Login(ctx context.Context, reg *models.Login) (*models.User, error)
+	FindByID(ctx context.Context, id string) (*models.User, error)
 }
 
 type userServiceImpl struct {
@@ -21,6 +22,10 @@ type userServiceImpl struct {
 
 func NewUserService(repo repositories.UserRepo) UserService {
 	return &userServiceImpl{repo: repo}
+}
+
+func (s *userServiceImpl) FindByID(ctx context.Context, id string) (*models.User, error) {
+	return s.repo.FindByID(ctx, id)
 }
 
 func (s *userServiceImpl) Register(ctx context.Context, reg *models.RegisterUser) error {

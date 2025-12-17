@@ -18,6 +18,8 @@ func main() {
 		log.Fatal(err)
 	}
 
+	config.AppConfig = cfg
+
 	db, err := postgresql.ConnectDB(cfg)
 	if err != nil {
 		log.Fatal(err)
