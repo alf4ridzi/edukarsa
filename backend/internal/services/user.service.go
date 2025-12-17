@@ -46,14 +46,8 @@ func (s *userServiceImpl) Register(ctx context.Context, reg *models.RegisterUser
 		Name:     reg.Name,
 		Email:    reg.Email,
 		Username: reg.Username,
+		Password: reg.Password,
 	}
-
-	hashPass, err := utils.HashPasswordBcrypt(reg.Password)
-	if err != nil {
-		return err
-	}
-
-	user.Password = hashPass
 
 	return s.repo.Create(ctx, user)
 }

@@ -48,13 +48,13 @@ func (c *UserController) Login(ctx *gin.Context) {
 		return
 	}
 
-	accessToken, err := utils.CreateAccessToken(user, c.cfg.AccessSecret, c.cfg.AccessTokenExpired)
+	accessToken, err := utils.CreateAccessToken(user.ID, user.Role.Name, c.cfg.AccessSecret, c.cfg.AccessTokenExpired)
 	if err != nil {
 		helpers.InternalServerError(ctx, "internal server error")
 		return
 	}
 
-	refreshToken, err := utils.CreateRefreshToken(user, c.cfg.RefreshSecret, c.cfg.RefreshTokenExpired)
+	refreshToken, err := utils.CreateRefreshToken(user.ID, c.cfg.RefreshSecret, c.cfg.RefreshTokenExpired)
 	if err != nil {
 		helpers.InternalServerError(ctx, "internal server error")
 		return
