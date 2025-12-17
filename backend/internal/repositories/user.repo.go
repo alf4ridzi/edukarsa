@@ -41,12 +41,12 @@ func (r *userRepoImpl) ExistByEmail(ctx context.Context, email string) (bool, er
 
 func (r *userRepoImpl) FindByUsername(ctx context.Context, username string) (*models.User, error) {
 	var user models.User
-	err := r.DB.WithContext(ctx).First(&user, "username = ?", username).Error
+	err := r.DB.WithContext(ctx).Preload("Role").First(&user, "username = ?", username).Error
 	return &user, err
 }
 
 func (r *userRepoImpl) FindByEmail(ctx context.Context, email string) (*models.User, error) {
 	var user models.User
-	err := r.DB.WithContext(ctx).First(&user, "email = ?", email).Error
+	err := r.DB.WithContext(ctx).Preload("Role").First(&user, "email = ?", email).Error
 	return &user, err
 }
