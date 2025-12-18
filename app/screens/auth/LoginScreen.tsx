@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, Image } from "react-native";
+import { View, Text, TouchableOpacity, Image, Alert } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import AuthInput from "../../components/auth/AuthInput";
 import { AuthStackParamList } from "@/navigation/AuthNavigator";
@@ -6,26 +6,30 @@ import { useState } from "react";
 
 type Props = NativeStackScreenProps<AuthStackParamList, "Login">;
 
+const LOGO = require("@/assets/images/logo-remove-bg.png");
+
 export default function LoginScreen({ navigation }: Props) {
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
-    console.log(identifier);
-    console.log(password);
+    if (!identifier || !password) {
+      Alert.alert("Data tidak lengkap", "Lengkapi data login!");
+      return;
+    }
   };
 
   return (
     <View className="flex-1 bg-white px-8 justify-center">
       <View className="items-center mb-10">
-        <Image
-          source={require("../../assets/images/icon.png")}
-          className="w-24 h-24 mb-4"
-          resizeMode="contain"
-        />
-        <Text className="text-3xl font-bold text-slate-800">EduKarsa</Text>
-        <Text className="text-slate-500 mt-2">Selamat Datang</Text>
+        <Image source={LOGO} className="w-48 h-48  mb-4" resizeMode="contain" />
+        <Text className="text-xl font-bold text-slate-800">
+          Login ke Edukarsa
+        </Text>
+        <Text className="text-slate-500 mt-2">
+          Yuk buat dunia lebih baik bersama-sama!
+        </Text>
       </View>
 
       <AuthInput

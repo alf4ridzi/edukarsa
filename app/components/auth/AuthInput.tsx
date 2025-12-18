@@ -18,27 +18,40 @@ export default function AuthInput({
   onChangeText,
 }: AuthInputProps) {
   const [hidePassword, setHidePassword] = useState(secureTextEntry);
+  const [isFocused, setIsFocused] = useState(false);
 
   return (
-    <View className="flex-row items-center border-b border-blue-500 mb-6">
-      <FontAwesome name={icon} size={18} color="#2563eb" />
-
+    <View
+      className={`flex-row items-center bg-gray-100 rounded-xl px-4 py-3 mb-4 ${
+        isFocused ? "border-2 border-blue-500" : "border-2 border-transparent"
+      }`}
+    >
+      <FontAwesome
+        name={icon}
+        size={20}
+        color={isFocused ? "#3b82f6" : "#9ca3af"}
+      />
       <TextInput
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
+        placeholderTextColor="#9ca3af"
         secureTextEntry={hidePassword}
         autoCapitalize="none"
         autoCorrect={false}
-        className="flex-1 ml-3 py-2 text-base"
+        onFocus={() => setIsFocused(true)}
+        onBlur={() => setIsFocused(false)}
+        className="flex-1 ml-3 text-base text-gray-800"
       />
-
       {secureTextEntry && (
-        <TouchableOpacity onPress={() => setHidePassword(!hidePassword)}>
+        <TouchableOpacity
+          onPress={() => setHidePassword(!hidePassword)}
+          className="ml-2"
+        >
           <FontAwesome
             name={hidePassword ? "eye-slash" : "eye"}
-            size={18}
-            color="#2563eb"
+            size={20}
+            color={isFocused ? "#3b82f6" : "#9ca3af"}
           />
         </TouchableOpacity>
       )}

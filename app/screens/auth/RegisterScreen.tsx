@@ -5,17 +5,19 @@ import { AuthStackParamList } from "../../navigation/AuthNavigator";
 
 type Props = NativeStackScreenProps<AuthStackParamList, "Register">;
 
+const LOGO = require("@/assets/images/logo-remove-bg.png");
+
 export default function RegisterScreen({ navigation }: Props) {
   return (
     <View className="flex-1 bg-white px-8 justify-center">
       <View className="items-center mb-10">
-        <Image
-          source={require("../../assets/images/icon.png")}
-          className="w-24 h-24 mb-4"
-          resizeMode="contain"
-        />
-        <Text className="text-3xl font-bold text-slate-800">Daftar Akun</Text>
-        <Text className="text-slate-500 mt-2">Buat akun EduKarsa</Text>
+        <Image source={LOGO} className="w-48 h-48 mb-4" resizeMode="contain" />
+        <Text className="text-xl font-bold text-slate-800">
+          Daftar ke Edukarsa
+        </Text>
+        <Text className="text-slate-500 mt-2">
+          Memulai itu sulit, namun sangat penting!
+        </Text>
       </View>
 
       <AuthInput icon="user" placeholder="Nama Lengkap" />
