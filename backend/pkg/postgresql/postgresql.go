@@ -10,6 +10,11 @@ import (
 	"gorm.io/gorm"
 )
 
+const MIGRATION = []any{
+	&models.User{},
+	&models.Role{},
+}
+
 func ConnectDB() (*gorm.DB, error) {
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%d sslmode=disable TimeZone=Asia/Jakarta",
 		config.AppConfig.DBHost, config.AppConfig.DBUser, config.AppConfig.DBPassword, config.AppConfig.DBName, config.AppConfig.DBPort)
@@ -37,5 +42,9 @@ func Close(db *gorm.DB) error {
 }
 
 func Migrate(db *gorm.DB) error {
-	return db.AutoMigrate(&models.User{})
+	return db.AutoMigrate(MIGRATION)
+}
+
+func Drop(db *gorm.DB) error {
+	return db.Migrator().DropTable(MIGRATION)
 }

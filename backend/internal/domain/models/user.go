@@ -4,18 +4,22 @@ import (
 	"edukarsa-backend/internal/utils"
 	"html"
 	"strings"
+	"time"
 
 	"gorm.io/gorm"
 )
 
 type User struct {
-	gorm.Model
-	RoleID   uint   `json:"-"`
-	Role     Role   `json:"role"`
-	Name     string `json:"name"`
-	Email    string `gorm:"uniqueIndex:idx_email;size:50" json:"email"`
-	Username string `gorm:"uniqueIndex:idx_username;size:100" json:"username"`
-	Password string `json:"-"`
+	ID        uint           `gorm:"primarykey" json:"id"`
+	RoleID    uint           `json:"-"`
+	Role      Role           `json:"role"`
+	Name      string         `json:"name"`
+	Email     string         `gorm:"uniqueIndex:idx_email;size:50" json:"email"`
+	Username  string         `gorm:"uniqueIndex:idx_username;size:100" json:"username"`
+	Password  string         `json:"-"`
+	CreatedAt time.Time      `json:"created_at"`
+	UpdatedAt time.Time      `json:"updated_at"`
+	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 }
 
 type RegisterUser struct {
