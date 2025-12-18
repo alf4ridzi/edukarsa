@@ -105,11 +105,9 @@ func (c *UserController) Login(ctx *gin.Context) {
 		return
 	}
 
-	data := map[string]models.TokenResponse{
-		"token": {
-			Access:  accessToken,
-			Refresh: refreshToken,
-		},
+	data := models.TokenResponse{
+		Access:  accessToken,
+		Refresh: refreshToken,
 	}
 
 	helpers.OK(ctx, "berhasil login", data)

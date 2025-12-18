@@ -1,8 +1,9 @@
 import { View, Text, TouchableOpacity, Image, Alert } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import AuthInput from "../../components/auth/AuthInput";
+import AuthInput from "@/components/auth/AuthInput";
 import { AuthStackParamList } from "@/navigation/AuthNavigator";
 import { useState } from "react";
+import { login } from "@/helpers/auth.helper";
 
 type Props = NativeStackScreenProps<AuthStackParamList, "Login">;
 
@@ -14,9 +15,20 @@ export default function LoginScreen({ navigation }: Props) {
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
-    if (!identifier || !password) {
-      Alert.alert("Data tidak lengkap", "Lengkapi data login!");
-      return;
+    try {
+      setLoading(true);
+
+      await login({
+        identifier,
+        password,
+      });
+
+      Alert.alert("login berhasil");
+      // navigation.replace("Home");
+    } catch (err: any) {
+      Alert.alert("Login gagal", err?.response?.data?.message || err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
