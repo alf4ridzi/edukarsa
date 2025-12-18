@@ -6,10 +6,11 @@ import {
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import "react-native-reanimated";
-import AuthNavigator from "@/navigation/AuthNavigator";
 
 import { useColorScheme } from "@/hooks/use-color-scheme";
-import "./global.css";
+
+import "../global.css";
+import AuthNavigator from "@/navigation/AuthNavigator";
 
 export const unstable_settings = {
   anchor: "(tabs)",
