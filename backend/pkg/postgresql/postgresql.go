@@ -10,7 +10,7 @@ import (
 	"gorm.io/gorm"
 )
 
-const MIGRATION = []any{
+var Migration = []any{
 	&models.User{},
 	&models.Role{},
 }
@@ -42,9 +42,9 @@ func Close(db *gorm.DB) error {
 }
 
 func Migrate(db *gorm.DB) error {
-	return db.AutoMigrate(MIGRATION)
+	return db.AutoMigrate(Migration...)
 }
 
-func Drop(db *gorm.DB) error {
-	return db.Migrator().DropTable(MIGRATION)
+func DropTable(db *gorm.DB) error {
+	return db.Migrator().DropTable(Migration...)
 }
