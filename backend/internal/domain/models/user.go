@@ -10,12 +10,12 @@ import (
 
 type User struct {
 	gorm.Model
-	RoleID   uint
-	Role     Role `json:"role"`
-	Name     string
-	Email    string `gorm:"uniqueIndex:idx_email;size:50"`
-	Username string `gorm:"uniqueIndex:idx_username;size:100"`
-	Password string
+	RoleID   uint   `json:"-"`
+	Role     Role   `json:"role"`
+	Name     string `json:"name"`
+	Email    string `gorm:"uniqueIndex:idx_email;size:50" json:"email"`
+	Username string `gorm:"uniqueIndex:idx_username;size:100" json:"username"`
+	Password string `json:"-"`
 }
 
 type RegisterUser struct {

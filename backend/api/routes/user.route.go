@@ -16,6 +16,6 @@ func NewUserRoutes(route *gin.RouterGroup, db *gorm.DB) {
 
 	user := route.Group("/users")
 	{
-		user.GET("/", userController.GetUser)
+		user.GET("/me", userController.GetUser)
 	}
 }

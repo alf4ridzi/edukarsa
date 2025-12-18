@@ -3,6 +3,7 @@ package middlewares
 import (
 	"edukarsa-backend/internal/utils"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -39,7 +40,16 @@ func AuthMiddleware(ctx *gin.Context) {
 		return
 	}
 
-	ctx.Set("user_id", claims.Subject)
+	userID, err := strconv.ParseUint(claims.Subject, 10, 64)
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+			"status":  false,
+			"message": "internal server error",
+		})
+		return
+	}
+
+	ctx.Set("user_id", userID)
 	ctx.Set("role", claims.Role)
 	ctx.Next()
 }

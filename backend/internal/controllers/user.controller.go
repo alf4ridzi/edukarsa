@@ -149,5 +149,26 @@ func (c *UserController) Register(ctx *gin.Context) {
 }
 
 func (c *UserController) GetUser(ctx *gin.Context) {
+	userID := ctx.GetUint64("user_id")
 
+	reqCtx, cancel := context.WithTimeout(ctx.Request.Context(), 2*time.Second)
+
+	defer cancel()
+
+	user, err := c.service.FindByID(reqCtx, userID)
+	if err != nil {
+		helpers.InternalServerError(ctx, "internal server error")
+		return
+	}
+
+	if user == nil {
+		helpers.ResponseJSON(ctx, http.StatusNotFound, false, "user tidak ada", nil)
+		return
+	}
+
+	data := map[string]*models.User{
+		"user": user,
+	}
+
+	helpers.OK(ctx, "berhasil mendapatkan data user", data)
 }
