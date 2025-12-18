@@ -11,5 +11,5 @@ type Role struct {
 	Name      string         `gorm:"size:50;uniqueIndex:idx_role;not null" json:"name"`
 	CreatedAt time.Time      `json:"created_at"`
 	UpdatedAt time.Time      `json:"updated_at"`
-	DeletedAt gorm.DeletedAt `gorm:"index"`
+	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 }

@@ -26,7 +26,7 @@ func NewUserRepo(db *gorm.DB) UserRepo {
 
 func (r *userRepoImpl) FindByID(ctx context.Context, id uint64) (*models.User, error) {
 	var user models.User
-	err := r.DB.WithContext(ctx).Preload("Role").Find(&user, "id = ?", id).Error
+	err := r.DB.WithContext(ctx).Preload("Role").First(&user, id).Error
 	return &user, err
 }
 
