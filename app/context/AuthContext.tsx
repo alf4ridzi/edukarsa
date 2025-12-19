@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
 import * as SecureStore from "expo-secure-store";
+import React, { createContext, useContext, useEffect, useState } from "react";
 
 type AuthContextType = {
   isAuthenticated: boolean;
@@ -24,7 +24,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const login = async (token: string) => {
-    console.log("called");
     await SecureStore.setItemAsync("access_token", token);
     setIsAuthenticated(true);
   };

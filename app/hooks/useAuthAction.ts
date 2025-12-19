@@ -1,10 +1,14 @@
-import { useAuth } from "@/context/AuthContext";
 import { loginApi, registerApi } from "@/api/auth.api";
+import { useAuth } from "@/context/AuthContext";
 import { saveTokens } from "@/helpers/storage";
 import { LoginRequest, RegisterRequest } from "@/types/auth";
 
 export const useAuthActions = () => {
-  const { login } = useAuth();
+  const { login, logout } = useAuth();
+
+  const logoutHandle = async () => {
+    await logout();
+  };
 
   const loginReq = async (payload: LoginRequest) => {
     const res = await loginApi(payload);
@@ -14,7 +18,6 @@ export const useAuthActions = () => {
     }
 
     await saveTokens(res.data.access_token, res.data.refresh_token);
-    console.log("wait login");
     await login(res.data.access_token);
   };
 
@@ -26,5 +29,5 @@ export const useAuthActions = () => {
     }
   };
 
-  return { loginReq, registerReq };
+  return { loginReq, registerReq, logoutHandle };
 };
