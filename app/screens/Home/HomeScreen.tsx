@@ -26,7 +26,7 @@ export default function HomeScreen() {
 
   return (
     <View>
-      <Text>Hi there</Text>
+      <Text className="text-black dark:text-white">Hi there</Text>
       <Button onPress={LogoutAlert} title="logout" />
     </View>
   );

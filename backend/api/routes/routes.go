@@ -10,7 +10,7 @@ import (
 )
 
 func Run(cfg *config.Config, router *gin.Engine) {
-	router.Run(fmt.Sprintf(":%d", cfg.ServerPort))
+	router.Run(fmt.Sprintf("0.0.0.0:%d", cfg.ServerPort))
 }
 
 func SetupRoute(cfg *config.Config, db *gorm.DB) {
