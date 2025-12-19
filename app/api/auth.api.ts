@@ -1,8 +1,13 @@
 import apiClient from "./client";
-import { LoginRequest, LoginResponse } from "@/types/auth";
+import { LoginRequest, LoginResponse, RegisterRequest } from "@/types/auth";
 
 export const loginApi = async (payload: LoginRequest) => {
   const res = await apiClient.post<LoginResponse>("/auth/login", payload);
+  return res.data;
+};
+
+export const registerApi = async (payload: RegisterRequest) => {
+  const res = await apiClient.post("/auth/register", payload);
   return res.data;
 };
 

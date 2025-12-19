@@ -1,6 +1,6 @@
-import { loginApi } from "@/api/auth.api";
+import { loginApi, registerApi } from "@/api/auth.api";
 import { saveTokens } from "./storage";
-import { LoginRequest } from "@/types/auth";
+import { LoginRequest, RegisterRequest } from "@/types/auth";
 
 export const login = async (payload: LoginRequest) => {
   const res = await loginApi(payload);
@@ -9,6 +9,16 @@ export const login = async (payload: LoginRequest) => {
   }
 
   await saveTokens(res.data.access_token, res.data.refresh_token);
+
+  return true;
+};
+
+export const register = async (payload: RegisterRequest) => {
+  const res = await registerApi(payload);
+
+  if (res.status !== true) {
+    throw new Error("register gagal");
+  }
 
   return true;
 };

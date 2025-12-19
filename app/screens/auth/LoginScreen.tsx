@@ -14,6 +14,11 @@ export default function LoginScreen({ navigation }: Props) {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
+  function clearForm() {
+    setIdentifier("");
+    setPassword("");
+  }
+
   const handleLogin = async () => {
     try {
       setLoading(true);
@@ -23,7 +28,8 @@ export default function LoginScreen({ navigation }: Props) {
         password,
       });
 
-      Alert.alert("login berhasil");
+      Alert.alert("Berhasil", "berhasil login!");
+      clearForm();
       // navigation.replace("Home");
     } catch (err: any) {
       Alert.alert("Login gagal", err?.response?.data?.message || err.message);
