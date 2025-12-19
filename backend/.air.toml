@@ -1,8 +1,7 @@
 root = "."
 tmp_dir = "tmp"
 
-polling = true
-polling_interval = 500
+pool = true
 
 [build]
 cmd = "go build -o ./tmp/main ./cmd/."
