@@ -3,7 +3,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import AuthInput from "@/components/auth/AuthInput";
 import { AuthStackParamList } from "@/navigation/AuthNavigator";
 import { useState } from "react";
-import { login } from "@/helpers/auth.helper";
+import { useAuthActions } from "@/hooks/useAuthAction";
 
 type Props = NativeStackScreenProps<AuthStackParamList, "Login">;
 
@@ -13,6 +13,7 @@ export default function LoginScreen({ navigation }: Props) {
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const { loginReq } = useAuthActions();
 
   function clearForm() {
     setIdentifier("");
@@ -23,7 +24,7 @@ export default function LoginScreen({ navigation }: Props) {
     try {
       setLoading(true);
 
-      await login({
+      await loginReq({
         identifier,
         password,
       });
@@ -52,7 +53,7 @@ export default function LoginScreen({ navigation }: Props) {
 
       <AuthInput
         icon="user"
-        placeholder="Username / NIS / Email"
+        placeholder="Username / Email"
         value={identifier}
         onChangeText={setIdentifier}
       />

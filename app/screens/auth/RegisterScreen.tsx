@@ -3,7 +3,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import AuthInput from "../../components/auth/AuthInput";
 import { AuthStackParamList } from "../../navigation/AuthNavigator";
 import { useState } from "react";
-import { register } from "@/helpers/auth.helper";
+import { useAuthActions } from "@/hooks/useAuthAction";
 
 type Props = NativeStackScreenProps<AuthStackParamList, "Register">;
 
@@ -16,6 +16,7 @@ export default function RegisterScreen({ navigation }: Props) {
   const [password, setPassword] = useState("");
   const [confirmpassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const { registerReq } = useAuthActions();
 
   function clearForm() {
     setName("");
@@ -34,7 +35,7 @@ export default function RegisterScreen({ navigation }: Props) {
         return;
       }
 
-      await register({
+      await registerReq({
         name,
         username,
         email,
