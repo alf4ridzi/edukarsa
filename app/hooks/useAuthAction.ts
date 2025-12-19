@@ -14,6 +14,7 @@ export const useAuthActions = () => {
     }
 
     await saveTokens(res.data.access_token, res.data.refresh_token);
+    console.log("wait login");
     await login(res.data.access_token);
   };
 
