@@ -13,6 +13,7 @@ type Config struct {
 	RefreshSecret       string `mapstructure:"REFRESH_SECRET"`
 	AccessTokenExpired  int    `mapstructure:"ACCESS_TOKEN_EXPIRED"`
 	RefreshTokenExpired int    `mapstructure:"REFRESH_TOKEN_EXPIRED"`
+	ServerHost          string `mapstructure:"SERVER_HOST"`
 }
 
 // global
