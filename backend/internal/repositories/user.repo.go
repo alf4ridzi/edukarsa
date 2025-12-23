@@ -26,7 +26,16 @@ func NewUserRepo(db *gorm.DB) UserRepo {
 }
 
 func (r *userRepoImpl) Update(ctx context.Context, user *models.User) error {
-	return r.DB.WithContext(ctx).Model(&models.User{}).Where("id", user.ID).Updates(&user).Error
+	tx := r.DB.WithContext(ctx).Model(&models.User{}).Where("id", user.ID).Updates(user)
+	if tx.Error != nil {
+		return tx.Error
+	}
+
+	if tx.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
+	}
+
+	return nil
 }
 
 func (r *userRepoImpl) FindByID(ctx context.Context, id uint64) (*models.User, error) {

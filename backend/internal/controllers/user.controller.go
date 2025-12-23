@@ -6,11 +6,13 @@ import (
 	"edukarsa-backend/internal/helpers"
 	"edukarsa-backend/internal/services"
 	"edukarsa-backend/internal/utils"
+	"errors"
 	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v5/pgconn"
 	"gorm.io/gorm"
 )
 
@@ -35,10 +37,15 @@ func (c *UserController) UpdateUser(ctx *gin.Context) {
 	defer cancel()
 
 	err := c.service.UpdateUserData(reqCtx, userID, input)
+
+	var pgErr *pgconn.PgError
+
 	if err != nil {
-		switch err {
-		case gorm.ErrRecordNotFound:
+		switch {
+		case errors.Is(err, gorm.ErrRecordNotFound):
 			helpers.ResponseJSON(ctx, http.StatusNotFound, false, "user tidak ditemukan", nil)
+		case errors.As(err, &pgErr) && pgErr.Code == "23505":
+			helpers.ResponseJSON(ctx, http.StatusConflict, false, "username/email tidak tersedia", nil)
 		default:
 			helpers.InternalServerError(ctx, "internal server error")
 		}
@@ -61,7 +68,7 @@ func (c *UserController) Refresh(ctx *gin.Context) {
 
 	claims, err := utils.ValidateRefreshToken(req.RefreshToken)
 	if err != nil {
-		helpers.InternalServerError(ctx, "token invalid/expired : "+err.Error())
+		helpers.InternalServerError(ctx, "token invalid/expired")
 		return
 	}
 
@@ -108,10 +115,10 @@ func (c *UserController) Login(ctx *gin.Context) {
 	user, err := c.service.Login(reqCtx, &reg)
 
 	if err != nil {
-		switch err {
-		case models.ErrWrongPassword:
+		switch {
+		case errors.Is(err, models.ErrWrongPassword):
 			helpers.ResponseJSON(ctx, http.StatusUnauthorized, false, "username/email/password salah", nil)
-		case gorm.ErrRecordNotFound:
+		case errors.Is(err, gorm.ErrRecordNotFound):
 			helpers.ResponseJSON(ctx, http.StatusUnauthorized, false, "username/email/password salah", nil)
 		default:
 			helpers.InternalServerError(ctx, "internal server error")
@@ -158,10 +165,10 @@ func (c *UserController) Register(ctx *gin.Context) {
 	err := c.service.Register(reqCtx, &reg)
 
 	if err != nil {
-		switch err {
-		case models.ErrUsernameExist:
+		switch {
+		case errors.Is(err, models.ErrUsernameExist):
 			helpers.ResponseJSON(ctx, http.StatusConflict, false, "username sudah ada", nil)
-		case models.ErrEmailExist:
+		case errors.Is(err, models.ErrEmailExist):
 			helpers.ResponseJSON(ctx, http.StatusConflict, false, "email sudah ada", nil)
 		default:
 			helpers.InternalServerError(ctx, "internal server error")
