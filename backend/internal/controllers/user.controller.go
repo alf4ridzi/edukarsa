@@ -22,6 +22,33 @@ func NewUserController(service services.UserService) *UserController {
 	return &UserController{service: service}
 }
 
+func (c *UserController) UpdateUser(ctx *gin.Context) {
+	var input models.UpdateUserData
+	if err := ctx.ShouldBindJSON(&input); err != nil {
+		helpers.BadRequest(ctx, "bad request")
+		return
+	}
+
+	userID := ctx.GetUint64("user_id")
+
+	reqCtx, cancel := context.WithTimeout(ctx.Request.Context(), 2*time.Second)
+	defer cancel()
+
+	err := c.service.UpdateUserData(reqCtx, userID, input)
+	if err != nil {
+		switch err {
+		case gorm.ErrRecordNotFound:
+			helpers.ResponseJSON(ctx, http.StatusNotFound, false, "user tidak ditemukan", nil)
+		default:
+			helpers.InternalServerError(ctx, "internal server error")
+		}
+
+		return
+	}
+
+	helpers.OK(ctx, "berhasil memperbarui data", nil)
+}
+
 func (c *UserController) Refresh(ctx *gin.Context) {
 	var req models.RefreshRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {

@@ -14,6 +14,7 @@ type UserService interface {
 	Register(ctx context.Context, reg *models.RegisterUser) error
 	Login(ctx context.Context, reg *models.Login) (*models.User, error)
 	FindByID(ctx context.Context, id uint64) (*models.User, error)
+	UpdateUserData(ctx context.Context, id uint64, data models.UpdateUserData) error
 }
 
 type userServiceImpl struct {
@@ -22,6 +23,31 @@ type userServiceImpl struct {
 
 func NewUserService(repo repositories.UserRepo) UserService {
 	return &userServiceImpl{repo: repo}
+}
+
+func (s *userServiceImpl) UpdateUserData(ctx context.Context, id uint64, data models.UpdateUserData) error {
+	user, err := s.repo.FindByID(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	if data.Name != nil {
+		user.Name = *data.Name
+	}
+
+	if data.Email != nil {
+		user.Email = *data.Email
+	}
+
+	if data.Username != nil {
+		user.Username = *data.Username
+	}
+
+	if data.BirthDay != nil {
+		user.BirthDay = data.BirthDay
+	}
+
+	return s.repo.Update(ctx, user)
 }
 
 func (s *userServiceImpl) FindByID(ctx context.Context, id uint64) (*models.User, error) {

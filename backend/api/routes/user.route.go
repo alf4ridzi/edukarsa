@@ -17,5 +17,6 @@ func NewUserRoutes(route *gin.RouterGroup, db *gorm.DB) {
 	user := route.Group("/users")
 	{
 		user.GET("/me", userController.GetUser)
+		user.PATCH("/me", userController.UpdateUser)
 	}
 }

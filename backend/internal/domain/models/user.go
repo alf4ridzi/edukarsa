@@ -10,29 +10,21 @@ import (
 )
 
 type User struct {
-	ID        uint           `gorm:"primarykey" json:"id"`
-	RoleID    uint           `json:"-"`
-	Role      Role           `json:"role"`
-	Name      string         `json:"name"`
-	Email     string         `gorm:"uniqueIndex:idx_email;size:50" json:"email"`
-	Username  string         `gorm:"uniqueIndex:idx_username;size:100" json:"username"`
-	Password  string         `json:"-"`
+	ID       uint       `gorm:"primarykey" json:"id"`
+	RoleID   uint       `json:"-"`
+	Role     Role       `json:"role"`
+	Name     string     `json:"name"`
+	Email    string     `gorm:"uniqueIndex:idx_email;size:50" json:"email"`
+	Username string     `gorm:"uniqueIndex:idx_username;size:100" json:"username"`
+	Password string     `json:"-"`
+	BirthDay *time.Time `json:"birthday"`
+
+	CreatedClass []Class `gorm:"foreignKey:CreatedByID"`
+	Class        []Class `gorm:"many2many:class_users;"`
+
 	CreatedAt time.Time      `json:"created_at"`
 	UpdatedAt time.Time      `json:"updated_at"`
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
-}
-
-type RegisterUser struct {
-	Name            string `json:"name"`
-	Email           string `json:"email"`
-	Username        string `json:"username"`
-	Password        string `json:"password"`
-	ConfirmPassword string `json:"confirmpassword"`
-}
-
-type Login struct {
-	Identifier string `json:"identifier"`
-	Password   string `json:"password"`
 }
 
 func (u *User) BeforeCreate(tx *gorm.DB) error {
