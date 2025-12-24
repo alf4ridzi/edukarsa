@@ -5,6 +5,8 @@ import (
 	"edukarsa-backend/internal/domain/models"
 	"edukarsa-backend/internal/helpers"
 	"edukarsa-backend/internal/services"
+	"errors"
+	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -28,10 +30,22 @@ func (c *ClassController) Create(ctx *gin.Context) {
 	reqCtx, cancel := context.WithTimeout(ctx.Request.Context(), 2*time.Second)
 	defer cancel()
 
-	err := c.service.CreateNewClass(reqCtx, input)
+	userID64 := ctx.GetUint64("user_id")
+	role := ctx.GetString("role")
+
+	userID := uint(userID64)
+
+	err := c.service.CreateNewClass(reqCtx, userID, role, input)
 	if err != nil {
 		switch {
-
+		case errors.Is(err, models.ErrForbidden):
+			helpers.ResponseJSON(ctx, http.StatusForbidden, false, "forbidden", nil)
+		default:
+			helpers.InternalServerError(ctx, "internal server error")
 		}
+
+		return
 	}
+
+	helpers.OK(ctx, "berhasil membuat kelas baru", nil)
 }

@@ -28,5 +28,5 @@ func (s *classServiceImpl) CreateNewClass(ctx context.Context, userID uint, role
 		CreatedById: userID,
 	}
 
-	return s.repo.Create(ctx, &class)
+	return s.repo.CreateNewClass(ctx, &class)
 }

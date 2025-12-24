@@ -26,11 +26,12 @@ func (r *classRepoImpl) Create(ctx context.Context, class *models.Class) error {
 
 func (r *classRepoImpl) CreateNewClass(ctx context.Context, class *models.Class) error {
 	return r.DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-		if err := tx.Model(&models.User{}).Updates({})
+		if err := tx.Create(class).Error; err != nil {
 			return err
 		}
 
-		if err := tx.Create(&class).Error; err != nil {
+		err := tx.Exec("INSERT INTO class_users (class_id, user_id) VALUES (?, ?)", class.ID, class.CreatedById).Error
+		if err != nil {
 			return err
 		}
 
