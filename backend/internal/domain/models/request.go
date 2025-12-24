@@ -25,3 +25,7 @@ type UpdateUserData struct {
 	Username *string    `json:"username"`
 	BirthDay *time.Time `json:"birthday"`
 }
+
+type CreateClassRequest struct {
+	Name string `json:"name"`
+}

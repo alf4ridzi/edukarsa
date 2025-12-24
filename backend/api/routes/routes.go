@@ -23,5 +23,7 @@ func SetupRoute(cfg *config.Config, db *gorm.DB) {
 	private.Use(middlewares.AuthMiddleware)
 
 	NewUserRoutes(private, db)
+	NewClassRoutes(private, db)
+
 	Run(cfg, route)
 }
