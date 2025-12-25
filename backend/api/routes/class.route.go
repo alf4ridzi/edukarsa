@@ -14,8 +14,10 @@ func NewClassRoutes(route *gin.RouterGroup, db *gorm.DB) {
 	classService := services.NewClassService(classRepo)
 	classController := controllers.NewClassController(classService)
 
-	class := route.Group("/class")
+	class := route.Group("/classes")
 	{
 		class.POST("", classController.Create)
+		class.GET("", classController.GetUserClasses)
+		class.POST("/join", classController.JoinClass)
 	}
 }

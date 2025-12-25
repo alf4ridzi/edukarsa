@@ -29,3 +29,7 @@ type UpdateUserData struct {
 type CreateClassRequest struct {
 	Name string `json:"name"`
 }
+
+type JoinClassRequest struct {
+	ClassID string `json:"class_id"`
+}

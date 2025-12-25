@@ -6,6 +6,7 @@ import (
 	"edukarsa-backend/internal/helpers"
 	"edukarsa-backend/internal/services"
 	"errors"
+	"log"
 	"net/http"
 	"time"
 
@@ -18,6 +19,41 @@ type ClassController struct {
 
 func NewClassController(service services.ClassService) *ClassController {
 	return &ClassController{service: service}
+}
+
+func (c *ClassController) JoinClass(ctx *gin.Context) {
+	var input models.JoinClassRequest
+	if err := ctx.ShouldBindJSON(&input); err != nil {
+		log.Println(err)
+		helpers.BadRequest(ctx, "bad request")
+		return
+	}
+
+	userID := ctx.GetUint("user_id")
+
+	err := c.service.JoinClass(ctx, input.ClassID, userID)
+	if err != nil {
+		helpers.InternalServerError(ctx, "internal server error")
+		return
+	}
+
+	helpers.OK(ctx, "berhasil join kelas", nil)
+}
+
+func (c *ClassController) GetUserClasses(ctx *gin.Context) {
+	reqCtx, cancel := context.WithTimeout(ctx.Request.Context(), 2*time.Second)
+	defer cancel()
+
+	userID := ctx.GetUint("user_id")
+
+	classes, err := c.service.GetUserClasses(reqCtx, userID)
+	if err != nil {
+		log.Println(err)
+		helpers.InternalServerError(ctx, "internal server error")
+		return
+	}
+
+	helpers.OK(ctx, "berhasil mendapatkan kelas", classes)
 }
 
 func (c *ClassController) Create(ctx *gin.Context) {

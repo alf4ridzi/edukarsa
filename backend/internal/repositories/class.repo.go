@@ -10,6 +10,12 @@ import (
 type ClassRepo interface {
 	Create(ctx context.Context, class *models.Class) error
 	CreateNewClass(ctx context.Context, class *models.Class) error
+	FindByUserID(ctx context.Context, userID uint) ([]models.Class, error)
+	JoinClass(ctx context.Context, classID uint, userID uint) error
+	ExistByID(ctx context.Context, classID uint) (bool, error)
+	IsUserJoined(ctx context.Context, classID uint, userID uint) (bool, error)
+	ExistByClassCode(ctx context.Context, classID string) (bool, error)
+	FindByClassCode(ctx context.Context, classCode string) (*models.Class, error)
 }
 
 type classRepoImpl struct {
@@ -18,6 +24,49 @@ type classRepoImpl struct {
 
 func NewClassRepo(db *gorm.DB) ClassRepo {
 	return &classRepoImpl{DB: db}
+}
+
+func (r *classRepoImpl) FindByClassCode(ctx context.Context, classCode string) (*models.Class, error) {
+	var class models.Class
+	err := r.DB.WithContext(ctx).First(&class, "code = ?", classCode).Error
+	return &class, err
+}
+
+func (r *classRepoImpl) IsUserJoined(ctx context.Context, classID uint, userID uint) (bool, error) {
+	var count int64
+	err := r.DB.WithContext(ctx).Table("class_users").Where("class_id = ? AND user_id = ?", classID, userID).Count(&count).Error
+	return count > 0, err
+}
+
+func (r *classRepoImpl) ExistByID(ctx context.Context, classID uint) (bool, error) {
+	var count int64
+	err := r.DB.WithContext(ctx).Model(&models.Class{}).Where("id = ?", classID).Count(&count).Error
+	return count > 0, err
+}
+
+func (r *classRepoImpl) ExistByClassCode(ctx context.Context, classID string) (bool, error) {
+	var count int64
+	err := r.DB.WithContext(ctx).Model(&models.Class{}).Where("code = ?", classID).Count(&count).Error
+	return count > 0, err
+}
+
+func (r *classRepoImpl) JoinClass(ctx context.Context, classID uint, userID uint) error {
+	err := r.DB.WithContext(ctx).Exec("INSERT INTO class_users (class_id, user_id) VALUES (?, ?)", classID, userID).Error
+	return err
+}
+
+func (r *classRepoImpl) FindByUserID(ctx context.Context, userID uint) ([]models.Class, error) {
+	var classes []models.Class
+	err := r.DB.WithContext(ctx).
+		Joins("LEFT JOIN class_users cu ON cu.class_id = classes.id").
+		Where(
+			"classes.created_by_id = ? OR cu.user_id = ?",
+			userID, userID,
+		).
+		Group("classes.id").
+		Find(&classes).Error
+
+	return classes, err
 }
 
 func (r *classRepoImpl) Create(ctx context.Context, class *models.Class) error {

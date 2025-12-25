@@ -11,8 +11,8 @@ import (
 )
 
 var Migration = []any{
-	&models.User{},
 	&models.Role{},
+	&models.User{},
 	&models.Class{},
 }
 

@@ -8,29 +8,29 @@ import (
 )
 
 type Class struct {
-	ID      uint   `gorm:"primaryKey"`
-	ClassID string `gorm:"uniqueIndex:idx_class_id;size:10"`
-	Name    string
+	ID   uint   `gorm:"primaryKey" json:"id"`
+	Code string `gorm:"uniqueIndex:idx_class_code;size:10" json:"code"`
+	Name string `json:"name"`
 
-	CreatedById uint
-	CreatedBy   User `gorm:"foreignKey:CreatedById"`
+	CreatedById uint `json:"-"`
+	CreatedBy   User `gorm:"foreignKey:CreatedById" json:"created_by"`
 
-	User []User `gorm:"many2many:class_users;"`
+	User []User `gorm:"many2many:class_users;" json:"user"`
 }
 
 func (c *Class) BeforeCreate(tx *gorm.DB) error {
-	if c.ClassID != "" {
+	if c.Code != "" {
 		return nil
 	}
 
 	for range 5 {
-		id := utils.GenerateRandomString(8)
+		code := utils.GenerateRandomString(8)
 
 		var count int64
-		tx.Model(&Class{}).Where("class_id = ?", id).Count(&count)
+		tx.Model(&Class{}).Where("code = ?", code).Count(&count)
 
 		if count == 0 {
-			c.ClassID = id
+			c.Code = code
 			return nil
 		}
 	}
