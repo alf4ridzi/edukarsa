@@ -18,6 +18,7 @@ func NewClassRoutes(route *gin.RouterGroup, db *gorm.DB) {
 	{
 		class.POST("", classController.Create)
 		class.GET("", classController.GetUserClasses)
-		class.POST("/join", classController.JoinClass)
+		class.POST("/:code/join", classController.JoinClass)
+		class.DELETE("/:code/leave", classController.LeaveClass)
 	}
 }

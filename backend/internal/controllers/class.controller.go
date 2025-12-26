@@ -22,17 +22,20 @@ func NewClassController(service services.ClassService) *ClassController {
 	return &ClassController{service: service}
 }
 
+func (c *ClassController) LeaveClass(ctx *gin.Context) {
+
+}
+
 func (c *ClassController) JoinClass(ctx *gin.Context) {
-	var input models.JoinClassRequest
-	if err := ctx.ShouldBindJSON(&input); err != nil {
-		log.Println(err)
-		helpers.BadRequest(ctx, "bad request")
+	classCode := ctx.Param("code")
+	if classCode == "" {
+		helpers.BadRequest(ctx, "bad response")
 		return
 	}
 
 	userID := ctx.GetUint64("user_id")
 
-	err := c.service.JoinClass(ctx, input.ClassCode, userID)
+	err := c.service.JoinClass(ctx, classCode, userID)
 	if err != nil {
 		switch {
 		case errors.Is(err, models.ErrAlreadyJoinedClass):
@@ -40,7 +43,6 @@ func (c *ClassController) JoinClass(ctx *gin.Context) {
 		case errors.Is(err, gorm.ErrRecordNotFound):
 			helpers.ResponseJSON(ctx, http.StatusNotFound, false, "kelas tidak ada", nil)
 		default:
-			log.Println(err)
 			helpers.InternalServerError(ctx, "internal server error")
 		}
 		return
