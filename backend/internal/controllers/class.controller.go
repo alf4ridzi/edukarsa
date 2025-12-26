@@ -23,7 +23,31 @@ func NewClassController(service services.ClassService) *ClassController {
 }
 
 func (c *ClassController) LeaveClass(ctx *gin.Context) {
+	classCode := ctx.Param("code")
+	if classCode == "" {
+		helpers.BadRequest(ctx, "bad response")
+		return
+	}
 
+	reqCtx, cancel := context.WithTimeout(ctx.Request.Context(), 2*time.Second)
+	defer cancel()
+
+	userID := ctx.GetUint64("user_id")
+
+	err := c.service.LeaveClass(reqCtx, classCode, userID)
+	if err != nil {
+		switch {
+		case errors.Is(err, models.ErrNotJoinedClass):
+			helpers.ResponseJSON(ctx, http.StatusNotFound, false, err.Error(), nil)
+		case errors.Is(err, gorm.ErrRecordNotFound):
+			helpers.ResponseJSON(ctx, http.StatusNotFound, false, "kelas tidak ada", nil)
+		default:
+			helpers.InternalServerError(ctx, "internal server error")
+		}
+		return
+	}
+
+	helpers.OK(ctx, "berhasil keluar kelas", nil)
 }
 
 func (c *ClassController) JoinClass(ctx *gin.Context) {
@@ -33,9 +57,12 @@ func (c *ClassController) JoinClass(ctx *gin.Context) {
 		return
 	}
 
+	reqCtx, cancel := context.WithTimeout(ctx.Request.Context(), 2*time.Second)
+	defer cancel()
+
 	userID := ctx.GetUint64("user_id")
 
-	err := c.service.JoinClass(ctx, classCode, userID)
+	err := c.service.JoinClass(reqCtx, classCode, userID)
 	if err != nil {
 		switch {
 		case errors.Is(err, models.ErrAlreadyJoinedClass):

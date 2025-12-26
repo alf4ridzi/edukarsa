@@ -8,4 +8,5 @@ var (
 	ErrWrongPassword      = errors.New("password is wrong")
 	ErrForbidden          = errors.New("forbidden")
 	ErrAlreadyJoinedClass = errors.New("sudah bergabung")
+	ErrNotJoinedClass     = errors.New("belum bergabung")
 )

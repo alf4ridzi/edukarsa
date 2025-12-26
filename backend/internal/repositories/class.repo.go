@@ -11,11 +11,12 @@ type ClassRepo interface {
 	Create(ctx context.Context, class *models.Class) error
 	CreateNewClass(ctx context.Context, class *models.Class) error
 	FindByUserID(ctx context.Context, userID uint64) ([]models.Class, error)
-	JoinClass(ctx context.Context, classID uint, userID uint64) error
+	JoinClass(ctx context.Context, classUser *models.ClassUser) error
 	ExistByID(ctx context.Context, classID uint) (bool, error)
 	IsUserJoined(ctx context.Context, classID uint, userID uint64) (bool, error)
 	ExistByClassCode(ctx context.Context, classCode string) (bool, error)
 	FindByClassCode(ctx context.Context, classCode string) (*models.Class, error)
+	Delete(ctx context.Context, classID uint, userID uint64) error
 }
 
 type classRepoImpl struct {
@@ -26,6 +27,12 @@ func NewClassRepo(db *gorm.DB) ClassRepo {
 	return &classRepoImpl{DB: db}
 }
 
+func (r *classRepoImpl) Delete(ctx context.Context, classID uint, userID uint64) error {
+	return r.DB.WithContext(ctx).
+		Where("class_id = ? AND user_id = ?", classID, userID).
+		Delete(&models.ClassUser{}).Error
+}
+
 func (r *classRepoImpl) FindByClassCode(ctx context.Context, classCode string) (*models.Class, error) {
 	var class models.Class
 	err := r.DB.WithContext(ctx).First(&class, "code = ?", classCode).Error
@@ -34,7 +41,7 @@ func (r *classRepoImpl) FindByClassCode(ctx context.Context, classCode string) (
 
 func (r *classRepoImpl) IsUserJoined(ctx context.Context, classID uint, userID uint64) (bool, error) {
 	var count int64
-	err := r.DB.WithContext(ctx).Table("class_users").Where("class_id = ? AND user_id = ?", classID, userID).Count(&count).Error
+	err := r.DB.WithContext(ctx).Model(&models.ClassUser{}).Where("class_id = ? AND user_id = ?", classID, userID).Count(&count).Error
 	return count > 0, err
 }
 
@@ -50,8 +57,8 @@ func (r *classRepoImpl) ExistByClassCode(ctx context.Context, classCode string) 
 	return count > 0, err
 }
 
-func (r *classRepoImpl) JoinClass(ctx context.Context, classID uint, userID uint64) error {
-	err := r.DB.WithContext(ctx).Exec("INSERT INTO class_users (class_id, user_id) VALUES (?, ?)", classID, userID).Error
+func (r *classRepoImpl) JoinClass(ctx context.Context, classUser *models.ClassUser) error {
+	err := r.DB.WithContext(ctx).Create(classUser).Error
 	return err
 }
 
