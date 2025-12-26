@@ -10,8 +10,8 @@ import (
 
 type ClassService interface {
 	CreateNewClass(ctx context.Context, userID uint, role string, input models.CreateClassRequest) error
-	GetUserClasses(ctx context.Context, userID uint) ([]models.Class, error)
-	JoinClass(ctx context.Context, classID string, userID uint) error
+	GetUserClasses(ctx context.Context, userID uint64) ([]models.Class, error)
+	JoinClass(ctx context.Context, classCode string, userID uint64) error
 }
 
 type classServiceImpl struct {
@@ -22,7 +22,7 @@ func NewClassService(repo repositories.ClassRepo) ClassService {
 	return &classServiceImpl{repo: repo}
 }
 
-func (s *classServiceImpl) JoinClass(ctx context.Context, classCode string, userID uint) error {
+func (s *classServiceImpl) JoinClass(ctx context.Context, classCode string, userID uint64) error {
 	exist, err := s.repo.ExistByClassCode(ctx, classCode)
 	if err != nil {
 		return err
@@ -49,7 +49,7 @@ func (s *classServiceImpl) JoinClass(ctx context.Context, classCode string, user
 	return s.repo.JoinClass(ctx, class.ID, userID)
 }
 
-func (s *classServiceImpl) GetUserClasses(ctx context.Context, userID uint) ([]models.Class, error) {
+func (s *classServiceImpl) GetUserClasses(ctx context.Context, userID uint64) ([]models.Class, error) {
 	return s.repo.FindByUserID(ctx, userID)
 }
 

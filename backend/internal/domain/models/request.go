@@ -31,5 +31,5 @@ type CreateClassRequest struct {
 }
 
 type JoinClassRequest struct {
-	ClassID string `json:"class_id"`
+	ClassCode string `json:"code"`
 }

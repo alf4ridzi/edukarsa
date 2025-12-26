@@ -4,6 +4,7 @@ import (
 	"edukarsa-backend/internal/config"
 	"edukarsa-backend/internal/domain/models"
 	"fmt"
+	"slices"
 	"time"
 
 	"gorm.io/driver/postgres"
@@ -14,7 +15,14 @@ var Migration = []any{
 	&models.Role{},
 	&models.User{},
 	&models.Class{},
+	&models.ClassUser{},
 }
+
+// var Migration = []any{
+// 	&models.User{},
+// 	&models.Class{},
+// 	&models.Role{},
+// }
 
 func ConnectDB() (*gorm.DB, error) {
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%d sslmode=disable TimeZone=Asia/Jakarta",
@@ -47,5 +55,7 @@ func Migrate(db *gorm.DB) error {
 }
 
 func DropTable(db *gorm.DB) error {
-	return db.Migrator().DropTable(Migration...)
+	migration := Migration
+	slices.Reverse(migration)
+	return db.Migrator().DropTable(migration...)
 }

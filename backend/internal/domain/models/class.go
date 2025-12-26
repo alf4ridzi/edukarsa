@@ -3,6 +3,7 @@ package models
 import (
 	"edukarsa-backend/internal/utils"
 	"errors"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -15,7 +16,17 @@ type Class struct {
 	CreatedById uint `json:"-"`
 	CreatedBy   User `gorm:"foreignKey:CreatedById" json:"created_by"`
 
-	User []User `gorm:"many2many:class_users;" json:"user"`
+	Users []User `gorm:"many2many:class_users;" json:"user"`
+
+	CreatedAt time.Time      `json:"created_at"`
+	UpdatedAt time.Time      `json:"updated_at"`
+	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
+}
+
+type ClassUser struct {
+	UserID    uint `gorm:"primaryKey"`
+	ClassID   uint `gorm:"primaryKey"`
+	CreatedAt time.Time
 }
 
 func (c *Class) BeforeCreate(tx *gorm.DB) error {

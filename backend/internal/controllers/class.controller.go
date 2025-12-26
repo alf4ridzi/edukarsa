@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 type ClassController struct {
@@ -29,22 +30,30 @@ func (c *ClassController) JoinClass(ctx *gin.Context) {
 		return
 	}
 
-	userID := ctx.GetUint("user_id")
+	userID := ctx.GetUint64("user_id")
 
-	err := c.service.JoinClass(ctx, input.ClassID, userID)
+	err := c.service.JoinClass(ctx, input.ClassCode, userID)
 	if err != nil {
-		helpers.InternalServerError(ctx, "internal server error")
+		switch {
+		case errors.Is(err, models.ErrAlreadyJoinedClass):
+			helpers.ResponseJSON(ctx, http.StatusConflict, false, "sudah bergabung", nil)
+		case errors.Is(err, gorm.ErrRecordNotFound):
+			helpers.ResponseJSON(ctx, http.StatusNotFound, false, "kelas tidak ada", nil)
+		default:
+			log.Println(err)
+			helpers.InternalServerError(ctx, "internal server error")
+		}
 		return
 	}
 
-	helpers.OK(ctx, "berhasil join kelas", nil)
+	helpers.OK(ctx, "berhasil bergabung ke kelas", nil)
 }
 
 func (c *ClassController) GetUserClasses(ctx *gin.Context) {
 	reqCtx, cancel := context.WithTimeout(ctx.Request.Context(), 2*time.Second)
 	defer cancel()
 
-	userID := ctx.GetUint("user_id")
+	userID := ctx.GetUint64("user_id")
 
 	classes, err := c.service.GetUserClasses(reqCtx, userID)
 	if err != nil {

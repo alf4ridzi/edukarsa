@@ -20,7 +20,7 @@ type User struct {
 	BirthDay *time.Time `json:"birthday"`
 
 	CreatedClass []Class `gorm:"foreignKey:CreatedByID"`
-	Class        []Class `gorm:"many2many:class_users;"`
+	Classes      []Class `gorm:"many2many:class_users;"`
 
 	CreatedAt time.Time      `json:"created_at"`
 	UpdatedAt time.Time      `json:"updated_at"`
