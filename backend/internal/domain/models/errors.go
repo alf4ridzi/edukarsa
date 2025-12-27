@@ -9,4 +9,5 @@ var (
 	ErrForbidden          = errors.New("forbidden")
 	ErrAlreadyJoinedClass = errors.New("sudah bergabung")
 	ErrNotJoinedClass     = errors.New("belum bergabung")
+	ErrCreatorCantLeave   = errors.New("kreator tidak boleh keluar")
 )

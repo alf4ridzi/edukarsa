@@ -5,6 +5,7 @@ import (
 	"edukarsa-backend/internal/domain/models"
 	"edukarsa-backend/internal/helpers"
 	"edukarsa-backend/internal/services"
+	"edukarsa-backend/internal/utils"
 	"errors"
 	"log"
 	"net/http"
@@ -20,6 +21,64 @@ type ClassController struct {
 
 func NewClassController(service services.ClassService) *ClassController {
 	return &ClassController{service: service}
+}
+
+func (c *ClassController) GetAssessments(ctx *gin.Context) {
+	reqCtx, cancel := context.WithTimeout(ctx.Request.Context(), 2*time.Second)
+	defer cancel()
+
+	publicID := ctx.Param("id")
+
+	parseUUID, err := utils.ParseUUIDString(publicID)
+	if err != nil {
+		helpers.InternalServerError(ctx, "internal server error")
+		return
+	}
+
+	assessments, err := c.service.ListAssessmentByPublicID(reqCtx, parseUUID)
+	if err != nil {
+		switch {
+		case errors.Is(err, gorm.ErrRecordNotFound):
+			helpers.ResponseJSON(ctx, http.StatusNotFound, false, "kelas tidak ada", nil)
+		default:
+			helpers.InternalServerError(ctx, "internal server error")
+		}
+
+		return
+	}
+
+	helpers.OK(ctx, "berhasil mendapatkan assessments", assessments)
+}
+
+func (c *ClassController) CreateNewAssessment(ctx *gin.Context) {
+	publicID := ctx.Param("id")
+
+	var input models.CreateAssessmentRequest
+	if err := ctx.ShouldBindJSON(&input); err != nil {
+		helpers.BadRequest(ctx, "bad request")
+		return
+	}
+
+	reqCtx, cancel := context.WithTimeout(ctx.Request.Context(), 2*time.Second)
+	defer cancel()
+
+	parseUUID, err := utils.ParseUUIDString(publicID)
+	if err != nil {
+		helpers.InternalServerError(ctx, "internal server error")
+		return
+	}
+
+	err = c.service.CreateNewAssessment(reqCtx, parseUUID, &input)
+	if err != nil {
+		switch {
+		default:
+			helpers.InternalServerError(ctx, "internal server error")
+		}
+
+		return
+	}
+
+	helpers.OK(ctx, "berhasil menambah assessment", nil)
 }
 
 func (c *ClassController) LeaveClass(ctx *gin.Context) {
@@ -41,6 +100,8 @@ func (c *ClassController) LeaveClass(ctx *gin.Context) {
 			helpers.ResponseJSON(ctx, http.StatusNotFound, false, err.Error(), nil)
 		case errors.Is(err, gorm.ErrRecordNotFound):
 			helpers.ResponseJSON(ctx, http.StatusNotFound, false, "kelas tidak ada", nil)
+		case errors.Is(err, models.ErrCreatorCantLeave):
+			helpers.ResponseJSON(ctx, http.StatusConflict, false, err.Error(), nil)
 		default:
 			helpers.InternalServerError(ctx, "internal server error")
 		}

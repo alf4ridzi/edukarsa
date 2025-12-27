@@ -3,20 +3,20 @@ package models
 import "time"
 
 type RefreshRequest struct {
-	RefreshToken string `json:"refresh_token"`
+	RefreshToken string `json:"refresh_token" binding:"required"`
 }
 
 type RegisterUser struct {
-	Name            string `json:"name"`
-	Email           string `json:"email"`
-	Username        string `json:"username"`
-	Password        string `json:"password"`
-	ConfirmPassword string `json:"confirmpassword"`
+	Name            string `json:"name" binding:"required"`
+	Email           string `json:"email" binding:"required"`
+	Username        string `json:"username" binding:"required"`
+	Password        string `json:"password" binding:"required"`
+	ConfirmPassword string `json:"confirmpassword" binding:"required"`
 }
 
 type Login struct {
-	Identifier string `json:"identifier"`
-	Password   string `json:"password"`
+	Identifier string `json:"identifier" binding:"required"`
+	Password   string `json:"password" binding:"required"`
 }
 
 type UpdateUserData struct {
@@ -27,9 +27,14 @@ type UpdateUserData struct {
 }
 
 type CreateClassRequest struct {
-	Name string `json:"name"`
+	Name string `json:"name" binding:"required"`
 }
 
 type JoinClassRequest struct {
-	ClassCode string `json:"code"`
+	ClassCode string `json:"code" binding:"required"`
+}
+
+type CreateAssessmentRequest struct {
+	Name       string    `json:"name" binding:"required"`
+	DeadlineAt time.Time `json:"deadline_at" binding:"required"`
 }

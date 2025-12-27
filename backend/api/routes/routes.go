@@ -24,6 +24,7 @@ func SetupRoute(cfg *config.Config, db *gorm.DB) {
 
 	NewUserRoutes(private, db)
 	NewClassRoutes(private, db)
+	NewAssessmentRoutes(private, db)
 
 	Run(cfg, route)
 }

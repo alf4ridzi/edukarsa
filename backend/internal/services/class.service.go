@@ -4,6 +4,9 @@ import (
 	"context"
 	"edukarsa-backend/internal/domain/models"
 	"edukarsa-backend/internal/repositories"
+
+	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 type ClassService interface {
@@ -11,6 +14,8 @@ type ClassService interface {
 	GetUserClasses(ctx context.Context, userID uint64) ([]models.Class, error)
 	JoinClass(ctx context.Context, classCode string, userID uint64) error
 	LeaveClass(ctx context.Context, classCode string, userID uint64) error
+	CreateNewAssessment(ctx context.Context, publicID uuid.UUID, input *models.CreateAssessmentRequest) error
+	ListAssessmentByPublicID(ctx context.Context, publicID uuid.UUID) ([]models.Assessment, error)
 }
 
 type classServiceImpl struct {
@@ -21,10 +26,42 @@ func NewClassService(repo repositories.ClassRepo) ClassService {
 	return &classServiceImpl{repo: repo}
 }
 
+func (s *classServiceImpl) ListAssessmentByPublicID(ctx context.Context, publicID uuid.UUID) ([]models.Assessment, error) {
+	class, err := s.repo.FindByPublicID(ctx, publicID)
+	if err != nil {
+		return nil, err
+	}
+
+	return s.repo.FindAssessmentsByID(ctx, class.ID)
+}
+
+func (s *classServiceImpl) CreateNewAssessment(ctx context.Context, publicID uuid.UUID, input *models.CreateAssessmentRequest) error {
+	class, err := s.repo.FindByPublicID(ctx, publicID)
+	if err != nil {
+		return err
+	}
+
+	if class == nil {
+		return gorm.ErrRecordNotFound
+	}
+
+	assessment := models.Assessment{
+		ClassID:    class.ID,
+		Name:       input.Name,
+		DeadlineAt: input.DeadlineAt,
+	}
+
+	return s.repo.CreateForClass(ctx, &assessment)
+}
+
 func (s *classServiceImpl) LeaveClass(ctx context.Context, classCode string, userID uint64) error {
 	class, err := s.repo.FindByClassCode(ctx, classCode)
 	if err != nil {
 		return err
+	}
+
+	if userID == uint64(class.CreatedById) {
+		return models.ErrCreatorCantLeave
 	}
 
 	joined, err := s.repo.IsUserJoined(ctx, class.ID, userID)

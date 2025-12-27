@@ -5,18 +5,22 @@ import (
 	"errors"
 	"time"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
 type Class struct {
-	ID   uint   `gorm:"primaryKey" json:"id"`
+	ID       uint      `gorm:"primaryKey" json:"-"`
+	PublicID uuid.UUID `gorm:"type:uuid;default:gen_random_uuid();uniqueIndex" json:"id"`
+
 	Code string `gorm:"uniqueIndex:idx_class_code;size:10" json:"code"`
 	Name string `json:"name"`
 
 	CreatedById uint `json:"-"`
-	CreatedBy   User `gorm:"foreignKey:CreatedById" json:"created_by"`
+	CreatedBy   User `gorm:"foreignKey:CreatedById;references:ID;not null" json:"created_by"`
 
-	Users []User `gorm:"many2many:class_users;" json:"user"`
+	Users       []User       `gorm:"many2many:class_users;" json:"users"`
+	Assessments []Assessment `json:"assessments"`
 
 	CreatedAt time.Time      `json:"created_at"`
 	UpdatedAt time.Time      `json:"updated_at"`

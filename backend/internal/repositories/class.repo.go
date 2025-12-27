@@ -4,6 +4,7 @@ import (
 	"context"
 	"edukarsa-backend/internal/domain/models"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -17,6 +18,9 @@ type ClassRepo interface {
 	ExistByClassCode(ctx context.Context, classCode string) (bool, error)
 	FindByClassCode(ctx context.Context, classCode string) (*models.Class, error)
 	Delete(ctx context.Context, classID uint, userID uint64) error
+	CreateForClass(ctx context.Context, assessment *models.Assessment) error
+	FindByPublicID(ctx context.Context, publicID uuid.UUID) (*models.Class, error)
+	FindAssessmentsByID(ctx context.Context, classID uint) ([]models.Assessment, error)
 }
 
 type classRepoImpl struct {
@@ -25,6 +29,22 @@ type classRepoImpl struct {
 
 func NewClassRepo(db *gorm.DB) ClassRepo {
 	return &classRepoImpl{DB: db}
+}
+
+func (r *classRepoImpl) FindAssessmentsByID(ctx context.Context, classID uint) ([]models.Assessment, error) {
+	var assessments []models.Assessment
+	err := r.DB.WithContext(ctx).Find(&assessments, "class_id = ?", classID).Error
+	return assessments, err
+}
+
+func (r *classRepoImpl) FindByPublicID(ctx context.Context, publicID uuid.UUID) (*models.Class, error) {
+	var class models.Class
+	err := r.DB.WithContext(ctx).First(&class, "public_id = ?", publicID).Error
+	return &class, err
+}
+
+func (r *classRepoImpl) CreateForClass(ctx context.Context, assessment *models.Assessment) error {
+	return r.DB.WithContext(ctx).Create(assessment).Error
 }
 
 func (r *classRepoImpl) Delete(ctx context.Context, classID uint, userID uint64) error {

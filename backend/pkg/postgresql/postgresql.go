@@ -16,13 +16,9 @@ var Migration = []any{
 	&models.User{},
 	&models.Class{},
 	&models.ClassUser{},
+	&models.Assessment{},
+	&models.AssessmentCollection{},
 }
-
-// var Migration = []any{
-// 	&models.User{},
-// 	&models.Class{},
-// 	&models.Role{},
-// }
 
 func ConnectDB() (*gorm.DB, error) {
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%d sslmode=disable TimeZone=Asia/Jakarta",
