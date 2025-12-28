@@ -71,6 +71,8 @@ func (c *ClassController) CreateNewAssessment(ctx *gin.Context) {
 	err = c.service.CreateNewAssessment(reqCtx, parseUUID, &input)
 	if err != nil {
 		switch {
+		case errors.Is(err, gorm.ErrRecordNotFound):
+			helpers.ResponseJSON(ctx, http.StatusNotFound, false, "kelas tidak ditemukan", nil)
 		default:
 			helpers.InternalServerError(ctx, "internal server error")
 		}

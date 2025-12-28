@@ -1,0 +1,34 @@
+# =====================
+# ADMIN – FULL ACCESS
+# =====================
+p, admin, /api/*, (GET|POST|PUT|PATCH|DELETE)
+
+# =====================
+# TEACHER
+# =====================
+p, teacher, /api/classes, (GET|POST)
+p, teacher, /api/classes/:id, (GET|PUT|DELETE)
+
+p, teacher, /api/classes/:id/assessment, (GET|POST)
+
+p, teacher, /api/assessments/:id, DELETE
+
+# =====================
+# STUDENT
+# =====================
+
+# profile
+p, student, /api/users/me, (GET|PATCH)
+
+# class
+p, student, /api/classes, GET
+p, student, /api/classes/:id/assessment, GET
+p, student, /api/classes/code/:code/join, POST
+p, student, /api/classes/code/:code/leave, DELETE
+
+# =====================
+# ROLE MAPPING
+# =====================
+g, user_admin, admin
+g, user_teacher, teacher
+g, user_student, student

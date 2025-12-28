@@ -12,6 +12,7 @@ import (
 )
 
 var Migration = []any{
+	// &models.Permission{},
 	&models.Role{},
 	&models.User{},
 	&models.Class{},

@@ -62,5 +62,10 @@ func main() {
 		return
 	}
 
-	routes.SetupRoute(cfg, db)
+	enforcer, err := config.InitCasbin(db)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	routes.SetupRoute(cfg, db, enforcer)
 }

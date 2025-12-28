@@ -28,9 +28,8 @@ type Class struct {
 }
 
 type ClassUser struct {
-	UserID    uint `gorm:"primaryKey"`
-	ClassID   uint `gorm:"primaryKey"`
-	CreatedAt time.Time
+	UserID  uint `gorm:"primaryKey"`
+	ClassID uint `gorm:"primaryKey"`
 }
 
 func (c *Class) BeforeCreate(tx *gorm.DB) error {
