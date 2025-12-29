@@ -8,7 +8,8 @@ p, admin, /api/*, (GET|POST|PUT|PATCH|DELETE)
 # =====================
 p, teacher, /api/classes, (GET|POST)
 p, teacher, /api/classes/:id, (GET|PUT|DELETE)
-
+p, teacher, /api/classes/code/:code/join, (POST)
+p, teacher, /api/classes/code/:code/leave, (DELETE)
 p, teacher, /api/classes/:id/assessment, (GET|POST)
 
 p, teacher, /api/assessments/:id, DELETE

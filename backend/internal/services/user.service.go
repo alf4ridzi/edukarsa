@@ -80,7 +80,7 @@ func (s *userServiceImpl) Register(ctx context.Context, reg *models.RegisterUser
 		Password: reg.Password,
 	}
 
-	return s.repo.Create(ctx, user)
+	return s.repo.Create(ctx, &user)
 }
 
 func (s *userServiceImpl) Login(ctx context.Context, reg *models.Login) (*models.User, error) {

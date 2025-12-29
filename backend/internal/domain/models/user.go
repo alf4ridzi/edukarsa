@@ -19,8 +19,8 @@ type User struct {
 	Password string     `json:"-"`
 	BirthDay *time.Time `json:"birthday"`
 
-	CreatedClass []Class `gorm:"foreignKey:CreatedByID"`
-	Classes      []Class `gorm:"many2many:class_users;"`
+	CreatedClass []Class `gorm:"foreignKey:CreatedByID" json:"created_class,omitempty"`
+	Classes      []Class `gorm:"many2many:class_users;" json:"class,omitempty"`
 
 	CreatedAt time.Time      `json:"created_at"`
 	UpdatedAt time.Time      `json:"updated_at"`

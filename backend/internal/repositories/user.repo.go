@@ -8,7 +8,7 @@ import (
 )
 
 type UserRepo interface {
-	Create(ctx context.Context, user models.User) error
+	Create(ctx context.Context, user *models.User) error
 	ExistByUsername(ctx context.Context, username string) (bool, error)
 	ExistByEmail(ctx context.Context, email string) (bool, error)
 	FindByUsername(ctx context.Context, username string) (*models.User, error)
@@ -44,7 +44,7 @@ func (r *userRepoImpl) FindByID(ctx context.Context, id uint64) (*models.User, e
 	return &user, err
 }
 
-func (r *userRepoImpl) Create(ctx context.Context, user models.User) error {
+func (r *userRepoImpl) Create(ctx context.Context, user *models.User) error {
 	return r.DB.WithContext(ctx).Create(&user).Error
 }
 
