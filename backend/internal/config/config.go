@@ -14,6 +14,7 @@ type Config struct {
 	AccessTokenExpired  int    `mapstructure:"ACCESS_TOKEN_EXPIRED"`
 	RefreshTokenExpired int    `mapstructure:"REFRESH_TOKEN_EXPIRED"`
 	ServerHost          string `mapstructure:"SERVER_HOST"`
+	MaxUploadSize       int64  `mapstructure:"MAX_UPLOAD_SIZE"`
 }
 
 // global

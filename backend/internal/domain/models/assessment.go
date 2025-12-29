@@ -20,17 +20,18 @@ type Assessment struct {
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 }
 
-type AssessmentCollection struct {
-	ID       uint `gorm:"primaryKey"`
-	File     string
-	Feedback string
-	Score    int
+type AssessmentSubmission struct {
+	ID          uuid.UUID `gorm:"primaryKey;type:uuid;default:gen_random_uuid()" json:"id"`
+	FileUrl     string    `json:"file_url"`
+	Feedback    *string   `json:"feedback"`
+	Score       *int      `json:"score"`
+	Description string    `json:"description"`
 
-	AssessmentID uuid.UUID  `gorm:"type:uuid;not null;index"`
-	Assessment   Assessment `gorm:"foreignKey:AssessmentID;references:ID"`
+	AssessmentID uuid.UUID  `gorm:"type:uuid;not null;index" json:"-"`
+	Assessment   Assessment `gorm:"foreignKey:AssessmentID;references:ID" json:"-"`
 
-	UserID uint `gorm:"not null;index"`
-	User   User `gorm:"foreignKey:UserID;references:ID"`
+	UserID uint `gorm:"not null;index" json:"-"`
+	User   User `gorm:"foreignKey:UserID;references:ID" json:"-"`
 
 	CreatedAt time.Time
 	UpdatedAt time.Time

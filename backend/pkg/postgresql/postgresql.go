@@ -18,7 +18,7 @@ var Migration = []any{
 	&models.Class{},
 	&models.ClassUser{},
 	&models.Assessment{},
-	&models.AssessmentCollection{},
+	&models.AssessmentSubmission{},
 }
 
 func ConnectDB() (*gorm.DB, error) {

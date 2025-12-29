@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"context"
+	"edukarsa-backend/internal/domain"
 	"edukarsa-backend/internal/domain/models"
 	"edukarsa-backend/internal/helpers"
 	"edukarsa-backend/internal/services"
@@ -116,7 +117,7 @@ func (c *UserController) Login(ctx *gin.Context) {
 
 	if err != nil {
 		switch {
-		case errors.Is(err, models.ErrWrongPassword):
+		case errors.Is(err, domain.ErrWrongPassword):
 			helpers.ResponseJSON(ctx, http.StatusUnauthorized, false, "username/email/password salah", nil)
 		case errors.Is(err, gorm.ErrRecordNotFound):
 			helpers.ResponseJSON(ctx, http.StatusUnauthorized, false, "username/email/password salah", nil)
@@ -166,9 +167,9 @@ func (c *UserController) Register(ctx *gin.Context) {
 
 	if err != nil {
 		switch {
-		case errors.Is(err, models.ErrUsernameExist):
+		case errors.Is(err, domain.ErrUsernameExist):
 			helpers.ResponseJSON(ctx, http.StatusConflict, false, "username sudah ada", nil)
-		case errors.Is(err, models.ErrEmailExist):
+		case errors.Is(err, domain.ErrEmailExist):
 			helpers.ResponseJSON(ctx, http.StatusConflict, false, "email sudah ada", nil)
 		default:
 			helpers.InternalServerError(ctx, "internal server error")

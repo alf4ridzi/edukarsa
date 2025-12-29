@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"context"
+	"edukarsa-backend/internal/domain"
 	"edukarsa-backend/internal/domain/models"
 	"edukarsa-backend/internal/helpers"
 	"edukarsa-backend/internal/services"
@@ -98,11 +99,11 @@ func (c *ClassController) LeaveClass(ctx *gin.Context) {
 	err := c.service.LeaveClass(reqCtx, classCode, userID)
 	if err != nil {
 		switch {
-		case errors.Is(err, models.ErrNotJoinedClass):
+		case errors.Is(err, domain.ErrNotJoinedClass):
 			helpers.ResponseJSON(ctx, http.StatusNotFound, false, err.Error(), nil)
 		case errors.Is(err, gorm.ErrRecordNotFound):
 			helpers.ResponseJSON(ctx, http.StatusNotFound, false, "kelas tidak ada", nil)
-		case errors.Is(err, models.ErrCreatorCantLeave):
+		case errors.Is(err, domain.ErrCreatorCantLeave):
 			helpers.ResponseJSON(ctx, http.StatusConflict, false, err.Error(), nil)
 		default:
 			helpers.InternalServerError(ctx, "internal server error")
@@ -128,7 +129,7 @@ func (c *ClassController) JoinClass(ctx *gin.Context) {
 	err := c.service.JoinClass(reqCtx, classCode, userID)
 	if err != nil {
 		switch {
-		case errors.Is(err, models.ErrAlreadyJoinedClass):
+		case errors.Is(err, domain.ErrAlreadyJoinedClass):
 			helpers.ResponseJSON(ctx, http.StatusConflict, false, "sudah bergabung", nil)
 		case errors.Is(err, gorm.ErrRecordNotFound):
 			helpers.ResponseJSON(ctx, http.StatusNotFound, false, "kelas tidak ada", nil)
@@ -175,7 +176,7 @@ func (c *ClassController) Create(ctx *gin.Context) {
 	err := c.service.CreateNewClass(reqCtx, userID, role, input)
 	if err != nil {
 		switch {
-		case errors.Is(err, models.ErrForbidden):
+		case errors.Is(err, domain.ErrForbidden):
 			helpers.ResponseJSON(ctx, http.StatusForbidden, false, "forbidden", nil)
 		default:
 			helpers.InternalServerError(ctx, "internal server error")

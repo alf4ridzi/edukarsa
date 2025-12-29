@@ -3,6 +3,7 @@ package main
 import (
 	"edukarsa-backend/api/routes"
 	"edukarsa-backend/internal/config"
+	"edukarsa-backend/internal/utils"
 	"edukarsa-backend/pkg/postgresql"
 	"edukarsa-backend/pkg/postgresql/seeders"
 	"flag"
@@ -10,6 +11,8 @@ import (
 )
 
 func main() {
+	utils.CreateFolder()
+
 	seedFlag := flag.Bool("seed", false, "run database seed")
 	migrationFlag := flag.Bool("migrate", false, "run database migrate")
 	dropTableFlag := flag.Bool("wipe", false, "drop all tables")

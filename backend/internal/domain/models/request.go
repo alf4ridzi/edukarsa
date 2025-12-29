@@ -1,6 +1,9 @@
 package models
 
-import "time"
+import (
+	"mime/multipart"
+	"time"
+)
 
 type RefreshRequest struct {
 	RefreshToken string `json:"refresh_token" binding:"required"`
@@ -37,4 +40,9 @@ type JoinClassRequest struct {
 type CreateAssessmentRequest struct {
 	Name       string    `json:"name" binding:"required"`
 	DeadlineAt time.Time `json:"deadline_at" binding:"required"`
+}
+
+type AssessmentSubmissionRequest struct {
+	File        *multipart.FileHeader `form:"file" binding:"required"`
+	Description string                `form:"description"`
 }

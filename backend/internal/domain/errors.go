@@ -1,4 +1,4 @@
-package models
+package domain
 
 import "errors"
 
@@ -10,4 +10,6 @@ var (
 	ErrAlreadyJoinedClass = errors.New("sudah bergabung")
 	ErrNotJoinedClass     = errors.New("belum bergabung")
 	ErrCreatorCantLeave   = errors.New("kreator tidak boleh keluar")
+	ErrInvalidExtension   = errors.New("extensi file tidak disupport")
+	ErrFileSizeTooBig     = errors.New("ukuran file terlalu besar")
 )

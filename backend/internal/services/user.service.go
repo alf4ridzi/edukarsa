@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"edukarsa-backend/internal/domain"
 	"edukarsa-backend/internal/domain/models"
 	"edukarsa-backend/internal/repositories"
 	"edukarsa-backend/internal/utils"
@@ -61,7 +62,7 @@ func (s *userServiceImpl) Register(ctx context.Context, reg *models.RegisterUser
 	}
 
 	if usernameExist {
-		return models.ErrUsernameExist
+		return domain.ErrUsernameExist
 	}
 
 	emailExist, err := s.repo.ExistByEmail(ctx, reg.Email)
@@ -70,7 +71,7 @@ func (s *userServiceImpl) Register(ctx context.Context, reg *models.RegisterUser
 	}
 
 	if emailExist {
-		return models.ErrEmailExist
+		return domain.ErrEmailExist
 	}
 
 	user := models.User{
@@ -103,7 +104,7 @@ func (s *userServiceImpl) Login(ctx context.Context, reg *models.Login) (*models
 	}
 
 	if !utils.ValidatePasswordBcrypt(reg.Password, user.Password) {
-		return nil, models.ErrWrongPassword
+		return nil, domain.ErrWrongPassword
 	}
 
 	return user, nil

@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"edukarsa-backend/internal/domain"
 	"edukarsa-backend/internal/domain/models"
 	"edukarsa-backend/internal/repositories"
 
@@ -61,7 +62,7 @@ func (s *classServiceImpl) LeaveClass(ctx context.Context, classCode string, use
 	}
 
 	if userID == uint64(class.CreatedById) {
-		return models.ErrCreatorCantLeave
+		return domain.ErrCreatorCantLeave
 	}
 
 	joined, err := s.repo.IsUserJoined(ctx, class.ID, userID)
@@ -70,7 +71,7 @@ func (s *classServiceImpl) LeaveClass(ctx context.Context, classCode string, use
 	}
 
 	if !joined {
-		return models.ErrNotJoinedClass
+		return domain.ErrNotJoinedClass
 	}
 
 	return s.repo.Delete(ctx, class.ID, userID)
@@ -89,7 +90,7 @@ func (s *classServiceImpl) JoinClass(ctx context.Context, classCode string, user
 	}
 
 	if joined {
-		return models.ErrAlreadyJoinedClass
+		return domain.ErrAlreadyJoinedClass
 	}
 
 	classUser := models.ClassUser{
@@ -106,7 +107,7 @@ func (s *classServiceImpl) GetUserClasses(ctx context.Context, userID uint64) ([
 
 func (s *classServiceImpl) CreateNewClass(ctx context.Context, userID uint, role string, input models.CreateClassRequest) error {
 	if role != "teacher" {
-		return models.ErrForbidden
+		return domain.ErrForbidden
 	}
 
 	class := models.Class{

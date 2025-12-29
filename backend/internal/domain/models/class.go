@@ -11,7 +11,7 @@ import (
 
 type Class struct {
 	ID       uint      `gorm:"primaryKey" json:"-"`
-	PublicID uuid.UUID `gorm:"type:uuid;default:gen_random_uuid();uniqueIndex" json:"id"`
+	PublicID uuid.UUID `gorm:"type:uuid;default:gen_random_uuid()" json:"id"`
 
 	Code string `gorm:"uniqueIndex:idx_class_code;size:10" json:"code"`
 	Name string `json:"name"`
