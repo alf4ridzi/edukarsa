@@ -31,16 +31,21 @@ func (c *SubmissionController) GetSubmission(ctx *gin.Context) {
 	reqCtx, cancel := context.WithTimeout(ctx.Request.Context(), 2*time.Second)
 	defer cancel()
 
-	submissionIDString := ctx.Param("id")
-	submissionID, err := utils.ParseUUIDString(submissionIDString)
+	assessmentIDString := ctx.Param("id")
+	assessmentID, err := utils.ParseUUIDString(assessmentIDString)
 
 	if err != nil {
 		helpers.BadRequest(ctx, "hell nah, thats not UUID bro")
 		return
 	}
 
-	log.Println(reqCtx, submissionID)
+	submission, err := c.service.GetAllSubmissionByAssessmentID(reqCtx, assessmentID)
+	if err != nil {
+		helpers.InternalServerError(ctx, "internal server error")
+		return
+	}
 
+	helpers.OK(ctx, "berhasil", submission)
 }
 
 func (c *SubmissionController) Submission(ctx *gin.Context) {

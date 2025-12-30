@@ -5,10 +5,13 @@ import (
 	"edukarsa-backend/internal/domain/models"
 	"edukarsa-backend/internal/repositories"
 	"edukarsa-backend/internal/utils"
+
+	"github.com/google/uuid"
 )
 
 type SubmissionService interface {
 	SubmitSubmission(ctx context.Context, assessmentID string, userID uint, fileURL string, input models.AssessmentSubmissionRequest) (*models.AssessmentSubmission, error)
+	GetAllSubmissionByAssessmentID(ctx context.Context, assessmentID uuid.UUID) ([]models.AssessmentSubmission, error)
 }
 
 type SubmissionServiceImpl struct {
@@ -43,4 +46,8 @@ func (s *SubmissionServiceImpl) SubmitSubmission(ctx context.Context, assessment
 	}
 
 	return &submission, nil
+}
+
+func (s *SubmissionServiceImpl) GetAllSubmissionByAssessmentID(ctx context.Context, assessmentID uuid.UUID) ([]models.AssessmentSubmission, error) {
+	return s.repo.FindAllByAssessmentID(ctx, assessmentID)
 }

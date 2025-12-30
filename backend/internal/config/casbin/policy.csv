@@ -11,7 +11,7 @@ p, teacher, /api/classes/:id, (GET|PUT|DELETE)
 p, teacher, /api/classes/code/:code/join, (POST)
 p, teacher, /api/classes/code/:code/leave, (DELETE)
 p, teacher, /api/classes/:id/assessment, (GET|POST)
-
+p, teacher, /api/assessments/:id/submission, (GET)
 p, teacher, /api/assessments/:id, DELETE
 
 # =====================

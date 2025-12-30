@@ -33,7 +33,7 @@ type AssessmentSubmission struct {
 	UserID uint `gorm:"not null;index" json:"-"`
 	User   User `gorm:"foreignKey:UserID;references:ID" json:"-"`
 
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt gorm.DeletedAt `gorm:"index"`
+	CreatedAt time.Time      `json:"created_at"`
+	UpdatedAt time.Time      `json:"updated_at"`
+	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 }
