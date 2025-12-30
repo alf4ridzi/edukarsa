@@ -2,12 +2,16 @@ package controllers
 
 import (
 	"context"
+	"edukarsa-backend/internal/domain"
 	"edukarsa-backend/internal/domain/models"
 	"edukarsa-backend/internal/helpers"
 	"edukarsa-backend/internal/services"
 	"edukarsa-backend/internal/utils"
+	"errors"
 	"fmt"
 	"log"
+	"net/http"
+	"path"
 	"path/filepath"
 	"time"
 
@@ -21,6 +25,22 @@ type SubmissionController struct {
 
 func NewSubmissionController(service services.SubmissionService) *SubmissionController {
 	return &SubmissionController{service: service}
+}
+
+func (c *SubmissionController) GetSubmission(ctx *gin.Context) {
+	reqCtx, cancel := context.WithTimeout(ctx.Request.Context(), 2*time.Second)
+	defer cancel()
+
+	submissionIDString := ctx.Param("id")
+	submissionID, err := utils.ParseUUIDString(submissionIDString)
+
+	if err != nil {
+		helpers.BadRequest(ctx, "hell nah, thats not UUID bro")
+		return
+	}
+
+	log.Println(reqCtx, submissionID)
+
 }
 
 func (c *SubmissionController) Submission(ctx *gin.Context) {
@@ -41,10 +61,15 @@ func (c *SubmissionController) Submission(ctx *gin.Context) {
 	fileName := fmt.Sprintf("%s%s", uuid.New(), ext)
 
 	filePath := filepath.Join("assets", "images", "submissions", fileName)
+	publicURL := "/" + path.Join("assets", "images", "submissions", fileName)
 
-	submission, err := c.service.SubmitSubmission(reqCtx, assesmentID, uint(userID), filePath, input)
+	submission, err := c.service.SubmitSubmission(reqCtx, assesmentID, uint(userID), publicURL, input)
 	if err != nil {
 		switch {
+		case errors.Is(err, domain.ErrFileSizeTooBig):
+			helpers.ResponseJSON(ctx, http.StatusRequestEntityTooLarge, false, "file terlalu besar", nil)
+		case errors.Is(err, domain.ErrInvalidExtension):
+			helpers.ResponseJSON(ctx, http.StatusUnsupportedMediaType, false, "file tidak disupport", nil)
 		default:
 			log.Println(err)
 			helpers.InternalServerError(ctx, "internal server error")

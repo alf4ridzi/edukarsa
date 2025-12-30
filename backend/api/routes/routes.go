@@ -17,6 +17,8 @@ func Run(cfg *config.Config, router *gin.Engine) {
 func SetupRoute(cfg *config.Config, db *gorm.DB, enforcer *casbin.Enforcer) {
 	route := gin.Default()
 
+	NewStaticRoute(route)
+
 	public := route.Group("/api")
 	NewAuthRoutes(public, db)
 

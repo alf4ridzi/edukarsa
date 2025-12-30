@@ -14,5 +14,6 @@ func NewSubmissionRoute(route *gin.RouterGroup, db *gorm.DB) {
 	service := services.NewSubmissionService(repo)
 	controller := controllers.NewSubmissionController(service)
 
+	route.GET("/:id/submission", controller.GetSubmission)
 	route.POST("/:id/submission", controller.Submission)
 }
