@@ -81,7 +81,13 @@ func (c *UserController) Refresh(ctx *gin.Context) {
 
 	user, err := c.service.FindByID(reqCtx, userID)
 	if err != nil {
-		helpers.InternalServerError(ctx, "internal server error")
+		switch {
+		case errors.Is(err, gorm.ErrRecordNotFound):
+			helpers.ResponseJSON(ctx, http.StatusNotFound, false, "user tidak ditemukan", nil)
+		default:
+			helpers.InternalServerError(ctx, "internal server error")
+		}
+
 		return
 	}
 

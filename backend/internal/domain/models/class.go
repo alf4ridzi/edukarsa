@@ -16,11 +16,11 @@ type Class struct {
 	Code string `gorm:"uniqueIndex:idx_class_code;size:10" json:"code"`
 	Name string `json:"name"`
 
-	CreatedById uint `json:"-"`
-	CreatedBy   User `gorm:"foreignKey:CreatedById;references:ID;not null" json:"created_by"`
+	CreatedById uint  `json:"-"`
+	CreatedBy   *User `gorm:"foreignKey:CreatedById;references:ID;not null" json:"created_by,omitempty"`
 
-	Users       []User       `gorm:"many2many:class_users;" json:"users"`
-	Assessments []Assessment `json:"assessments"`
+	Users       []User       `gorm:"many2many:class_users;" json:"users,omitempty"`
+	Assessments []Assessment `json:"assessments,omitempty"`
 
 	CreatedAt time.Time      `json:"created_at"`
 	UpdatedAt time.Time      `json:"updated_at"`

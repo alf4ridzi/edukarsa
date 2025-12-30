@@ -11,11 +11,11 @@ import (
 )
 
 type ClassService interface {
-	CreateNewClass(ctx context.Context, userID uint, role string, input models.CreateClassRequest) error
+	CreateNewClass(ctx context.Context, userID uint, role string, input models.CreateClassRequest) (*models.Class, error)
 	GetUserClasses(ctx context.Context, userID uint64) ([]models.Class, error)
 	JoinClass(ctx context.Context, classCode string, userID uint64) error
 	LeaveClass(ctx context.Context, classCode string, userID uint64) error
-	CreateNewAssessment(ctx context.Context, publicID uuid.UUID, input *models.CreateAssessmentRequest) error
+	CreateNewAssessment(ctx context.Context, publicID uuid.UUID, input *models.CreateAssessmentRequest) (*models.Assessment, error)
 	ListAssessmentByPublicID(ctx context.Context, publicID uuid.UUID) ([]models.Assessment, error)
 }
 
@@ -36,14 +36,14 @@ func (s *classServiceImpl) ListAssessmentByPublicID(ctx context.Context, publicI
 	return s.repo.FindAssessmentsByID(ctx, class.ID)
 }
 
-func (s *classServiceImpl) CreateNewAssessment(ctx context.Context, publicID uuid.UUID, input *models.CreateAssessmentRequest) error {
+func (s *classServiceImpl) CreateNewAssessment(ctx context.Context, publicID uuid.UUID, input *models.CreateAssessmentRequest) (*models.Assessment, error) {
 	class, err := s.repo.FindByPublicID(ctx, publicID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if class == nil {
-		return gorm.ErrRecordNotFound
+		return nil, gorm.ErrRecordNotFound
 	}
 
 	assessment := models.Assessment{
@@ -52,7 +52,8 @@ func (s *classServiceImpl) CreateNewAssessment(ctx context.Context, publicID uui
 		DeadlineAt: input.DeadlineAt,
 	}
 
-	return s.repo.CreateForClass(ctx, &assessment)
+	err = s.repo.CreateForClass(ctx, &assessment)
+	return &assessment, err
 }
 
 func (s *classServiceImpl) LeaveClass(ctx context.Context, classCode string, userID uint64) error {
@@ -105,15 +106,16 @@ func (s *classServiceImpl) GetUserClasses(ctx context.Context, userID uint64) ([
 	return s.repo.FindByUserID(ctx, userID)
 }
 
-func (s *classServiceImpl) CreateNewClass(ctx context.Context, userID uint, role string, input models.CreateClassRequest) error {
-	if role != "teacher" {
-		return domain.ErrForbidden
-	}
-
+func (s *classServiceImpl) CreateNewClass(ctx context.Context, userID uint, role string, input models.CreateClassRequest) (*models.Class, error) {
 	class := models.Class{
 		Name:        input.Name,
 		CreatedById: userID,
 	}
 
-	return s.repo.CreateNewClass(ctx, &class)
+	err := s.repo.CreateNewClass(ctx, &class)
+	if err != nil {
+		return nil, err
+	}
+
+	return &class, nil
 }

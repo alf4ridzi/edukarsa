@@ -42,12 +42,15 @@ func (c *SubmissionController) Submission(ctx *gin.Context) {
 
 	filePath := filepath.Join("assets", "images", "submissions", fileName)
 
-	err := c.service.SubmitSubmission(reqCtx, assesmentID, uint(userID), filePath, input)
+	submission, err := c.service.SubmitSubmission(reqCtx, assesmentID, uint(userID), filePath, input)
 	if err != nil {
 		switch {
 		default:
+			log.Println(err)
 			helpers.InternalServerError(ctx, "internal server error")
 		}
+
+		return
 	}
 
 	if err := ctx.SaveUploadedFile(input.File, filePath, 0755); err != nil {
@@ -56,5 +59,5 @@ func (c *SubmissionController) Submission(ctx *gin.Context) {
 		return
 	}
 
-	helpers.OK(ctx, "ok", nil)
+	helpers.OK(ctx, "ok", submission)
 }

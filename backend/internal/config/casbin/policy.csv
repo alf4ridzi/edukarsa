@@ -27,6 +27,9 @@ p, student, /api/classes/:id/assessment, GET
 p, student, /api/classes/code/:code/join, POST
 p, student, /api/classes/code/:code/leave, DELETE
 
+# assessment
+p, student, /api/assessments/:id/submission, POST
+
 # =====================
 # ROLE MAPPING
 # =====================

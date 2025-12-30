@@ -8,7 +8,7 @@ import (
 )
 
 type SubmissionService interface {
-	SubmitSubmission(ctx context.Context, assessmentID string, userID uint, fileURL string, input models.AssessmentSubmissionRequest) error
+	SubmitSubmission(ctx context.Context, assessmentID string, userID uint, fileURL string, input models.AssessmentSubmissionRequest) (*models.AssessmentSubmission, error)
 }
 
 type SubmissionServiceImpl struct {
@@ -19,23 +19,28 @@ func NewSubmissionService(repo repositories.SubmissionRepo) SubmissionService {
 	return &SubmissionServiceImpl{repo: repo}
 }
 
-func (s *SubmissionServiceImpl) SubmitSubmission(ctx context.Context, assessmentID string, userID uint, fileURL string, input models.AssessmentSubmissionRequest) error {
+func (s *SubmissionServiceImpl) SubmitSubmission(ctx context.Context, assessmentID string, userID uint, fileURL string, input models.AssessmentSubmissionRequest) (*models.AssessmentSubmission, error) {
 	err := utils.ValidateUpload(input.File)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	parseAssmentID, err := utils.ParseUUIDString(assessmentID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	submission := models.AssessmentSubmission{
 		FileUrl:      fileURL,
-		Description:  input.Description,
+		Description:  *input.Description,
 		UserID:       userID,
 		AssessmentID: parseAssmentID,
 	}
 
-	return s.repo.Create(ctx, &submission)
+	err = s.repo.Create(ctx, &submission)
+	if err != nil {
+		return nil, err
+	}
+
+	return &submission, nil
 }

@@ -69,7 +69,7 @@ func (c *ClassController) CreateNewAssessment(ctx *gin.Context) {
 		return
 	}
 
-	err = c.service.CreateNewAssessment(reqCtx, parseUUID, &input)
+	assessment, err := c.service.CreateNewAssessment(reqCtx, parseUUID, &input)
 	if err != nil {
 		switch {
 		case errors.Is(err, gorm.ErrRecordNotFound):
@@ -81,7 +81,7 @@ func (c *ClassController) CreateNewAssessment(ctx *gin.Context) {
 		return
 	}
 
-	helpers.OK(ctx, "berhasil menambah assessment", nil)
+	helpers.OK(ctx, "berhasil menambah assessment", assessment)
 }
 
 func (c *ClassController) LeaveClass(ctx *gin.Context) {
@@ -173,7 +173,7 @@ func (c *ClassController) Create(ctx *gin.Context) {
 
 	userID := uint(userID64)
 
-	err := c.service.CreateNewClass(reqCtx, userID, role, input)
+	class, err := c.service.CreateNewClass(reqCtx, userID, role, input)
 	if err != nil {
 		switch {
 		case errors.Is(err, domain.ErrForbidden):
@@ -185,5 +185,5 @@ func (c *ClassController) Create(ctx *gin.Context) {
 		return
 	}
 
-	helpers.OK(ctx, "berhasil membuat kelas baru", nil)
+	helpers.OK(ctx, "berhasil membuat kelas baru", class)
 }

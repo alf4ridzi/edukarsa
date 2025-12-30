@@ -44,5 +44,5 @@ type CreateAssessmentRequest struct {
 
 type AssessmentSubmissionRequest struct {
 	File        *multipart.FileHeader `form:"file" binding:"required"`
-	Description string                `form:"description"`
+	Description *string               `form:"description"`
 }

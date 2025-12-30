@@ -17,8 +17,11 @@ func ValidateExtension(extension string) bool {
 	return config.AllowedExtensions[extension]
 }
 
-func ValidateFileSize(file *multipart.FileHeader) bool {
-	return file.Size > config.MaxUploadSizeBytes()
+func ValidateFileSize(file *multipart.FileHeader) error {
+	if file.Size > config.MaxUploadSizeBytes() {
+		return domain.ErrFileSizeTooBig
+	}
+	return nil
 }
 
 func ValidateUpload(file *multipart.FileHeader) error {
@@ -26,8 +29,8 @@ func ValidateUpload(file *multipart.FileHeader) error {
 		return domain.ErrInvalidExtension
 	}
 
-	if !ValidateFileSize(file) {
-		return domain.ErrFileSizeTooBig
+	if err := ValidateFileSize(file); err != nil {
+		return err
 	}
 
 	return nil

@@ -20,6 +20,8 @@ func CasbinMiddleware(e *casbin.Enforcer) gin.HandlerFunc {
 		obj := ctx.FullPath()
 		act := ctx.Request.Method
 
+		log.Println(obj)
+
 		allowed, err := e.Enforce(role, obj, act, userIDString)
 		if err != nil {
 			log.Println(err)
@@ -36,5 +38,4 @@ func CasbinMiddleware(e *casbin.Enforcer) gin.HandlerFunc {
 
 		ctx.Next()
 	}
-
 }
