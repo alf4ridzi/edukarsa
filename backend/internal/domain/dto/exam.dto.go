@@ -33,3 +33,9 @@ type ExamOptionResponse struct {
 	ID   uint   `json:"id"`
 	Text string `json:"text"`
 }
+
+type ExamQuestionStudentResponse struct {
+	ID       uint                 `json:"id"`
+	Question string               `json:"question"`
+	Options  []ExamOptionResponse `json:"options"`
+}

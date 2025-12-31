@@ -26,16 +26,16 @@ type Exam struct {
 }
 
 type ExamQuestion struct {
-	ID uint `gorm:"primaryKey"`
+	ID uint `gorm:"primaryKey" json:"id"`
 
-	ExamID uuid.UUID `gorm:"type:uuid;index;not null"`
-	Exam   *Exam     `gorm:"foreignKey:ExamID"`
+	ExamID uuid.UUID `gorm:"type:uuid;index;not null" json:"-"`
+	Exam   *Exam     `gorm:"foreignKey:ExamID" json:"exam,omitempty"`
 
 	Question    string  `gorm:"type:text;not null" json:"question"`
 	Explanation *string `json:"explanation"`
 
 	AnswerID *uint       `json:"-"`
-	Answer   *ExamOption `gorm:"-"`
+	Answer   *ExamOption `gorm:"-" json:"-"`
 
 	Options []ExamOption `gorm:"foreignKey:ExamQuestionID" json:"options"`
 

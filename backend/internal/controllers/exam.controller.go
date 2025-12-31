@@ -24,7 +24,29 @@ func NewExamController(service services.ExamService) *ExamController {
 }
 
 func (c *ExamController) GetQuestions(ctx *gin.Context) {
+	examID, err := utils.ParseUUIDString(ctx.Param("id"))
+	if err != nil {
+		helpers.BadRequest(ctx, "EXAM ID IS NOT VALID")
+		return
+	}
 
+	reqCtx, cancel := context.WithTimeout(ctx.Request.Context(), 2*time.Second)
+	defer cancel()
+
+	questions, err := c.service.ListExamQuestions(reqCtx, examID)
+	if err != nil {
+		switch {
+		case errors.Is(err, gorm.ErrRecordNotFound):
+			helpers.ResponseJSON(ctx, http.StatusNotFound, false, "ujian tidak ditemukan", nil)
+		default:
+			log.Println(err)
+			helpers.InternalServerError(ctx, "internal server error")
+		}
+
+		return
+	}
+
+	helpers.OK(ctx, "berhasil mendapatkan pertanyaan ujian", questions)
 }
 
 func (c *ExamController) CreateQuestions(ctx *gin.Context) {

@@ -5,6 +5,7 @@ import (
 	"edukarsa-backend/internal/domain"
 	"edukarsa-backend/internal/domain/dto"
 	"edukarsa-backend/internal/domain/models"
+	"edukarsa-backend/internal/mapper"
 	"edukarsa-backend/internal/repositories"
 
 	"github.com/google/uuid"
@@ -14,19 +15,36 @@ import (
 type ExamService interface {
 	CreateNewExam(ctx context.Context, userID uint, input dto.CreateExamRequest) (*models.Exam, error)
 	CreateQuestions(ctx context.Context, examID uuid.UUID, input []dto.CreateExamQuestionRequest) ([]dto.ExamQuestionResponse, error)
+	ListExamQuestions(ctx context.Context, examID uuid.UUID) ([]dto.ExamQuestionStudentResponse, error)
 }
 
-type ExamServiceImpl struct {
+type examServiceImpl struct {
 	DB        *gorm.DB
 	repo      repositories.ExamRepo
 	classRepo repositories.ClassRepo
 }
 
 func NewExamService(db *gorm.DB, repo repositories.ExamRepo, classRepo repositories.ClassRepo) ExamService {
-	return &ExamServiceImpl{DB: db, repo: repo, classRepo: classRepo}
+	return &examServiceImpl{DB: db, repo: repo, classRepo: classRepo}
 }
 
-func (s *ExamServiceImpl) CreateQuestions(ctx context.Context, examID uuid.UUID, input []dto.CreateExamQuestionRequest) ([]dto.ExamQuestionResponse, error) {
+func (s *examServiceImpl) ListExamQuestions(ctx context.Context, examID uuid.UUID) ([]dto.ExamQuestionStudentResponse, error) {
+	exam, err := s.repo.FindExamByID(ctx, examID)
+	if err != nil {
+		return nil, err
+	}
+
+	questions, err := s.repo.ListQuestionsByExamID(ctx, exam.ID)
+	responses := make([]dto.ExamQuestionStudentResponse, 0, len(questions))
+
+	for _, q := range questions {
+		responses = append(responses, mapper.ToStudentQuestionResponse(q))
+	}
+
+	return responses, nil
+}
+
+func (s *examServiceImpl) CreateQuestions(ctx context.Context, examID uuid.UUID, input []dto.CreateExamQuestionRequest) ([]dto.ExamQuestionResponse, error) {
 	exam, err := s.repo.FindExamByID(ctx, examID)
 	if err != nil {
 		return nil, err
@@ -102,7 +120,7 @@ func (s *ExamServiceImpl) CreateQuestions(ctx context.Context, examID uuid.UUID,
 	return responses, nil
 }
 
-func (s *ExamServiceImpl) CreateNewExam(ctx context.Context, userID uint, input dto.CreateExamRequest) (*models.Exam, error) {
+func (s *examServiceImpl) CreateNewExam(ctx context.Context, userID uint, input dto.CreateExamRequest) (*models.Exam, error) {
 	class, err := s.classRepo.FindByPublicID(ctx, input.ClassID)
 	if err != nil {
 		return nil, err
