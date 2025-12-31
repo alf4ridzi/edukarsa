@@ -22,13 +22,14 @@ func SetupRoute(cfg *config.Config, db *gorm.DB, enforcer *casbin.Enforcer) {
 	public := route.Group("/api")
 	NewAuthRoutes(public, db)
 
-	private := route.Group("/api")
-	private.Use(middlewares.AuthMiddleware())
-	private.Use(middlewares.CasbinMiddleware(enforcer))
+	protected := route.Group("/api")
+	protected.Use(middlewares.AuthMiddleware())
+	protected.Use(middlewares.CasbinMiddleware(enforcer))
 
-	NewUserRoutes(private, db)
-	NewClassRoutes(private, db)
-	NewAssessmentRoutes(private, db)
+	NewUserRoutes(protected, db)
+	NewClassRoutes(protected, db)
+	NewAssessmentRoutes(protected, db)
+	NewExamRoutes(protected, db)
 
 	Run(cfg, route)
 }

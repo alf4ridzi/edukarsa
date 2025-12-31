@@ -19,5 +19,5 @@ func NewAssessmentRoutes(route *gin.RouterGroup, db *gorm.DB) {
 		assess.DELETE("/:id", controllers.Delete)
 	}
 
-	NewSubmissionRoute(assess, db)
+	NewSubmissionRoute(assess, route, db)
 }

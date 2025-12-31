@@ -46,3 +46,8 @@ type AssessmentSubmissionRequest struct {
 	File        *multipart.FileHeader `form:"file" binding:"required"`
 	Description *string               `form:"description"`
 }
+
+type EditSubmissionRequest struct {
+	Score    *int    `json:"score"`
+	Feedback *string `json:"feedback"`
+}

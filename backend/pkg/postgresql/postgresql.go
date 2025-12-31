@@ -12,13 +12,16 @@ import (
 )
 
 var Migration = []any{
-	// &models.Permission{},
 	&models.Role{},
 	&models.User{},
 	&models.Class{},
 	&models.ClassUser{},
-	&models.Assessment{},
-	&models.AssessmentSubmission{},
+
+	&models.Exam{},
+	&models.ExamQuestion{},
+	&models.ExamOption{},
+	&models.ExamUserAnswer{},
+	&models.ExamScore{},
 }
 
 func ConnectDB() (*gorm.DB, error) {

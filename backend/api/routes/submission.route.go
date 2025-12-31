@@ -9,11 +9,16 @@ import (
 	"gorm.io/gorm"
 )
 
-func NewSubmissionRoute(route *gin.RouterGroup, db *gorm.DB) {
+func NewSubmissionRoute(assessments *gin.RouterGroup, api *gin.RouterGroup, db *gorm.DB) {
 	repo := repositories.NewSubmissionRepo(db)
 	service := services.NewSubmissionService(repo)
 	controller := controllers.NewSubmissionController(service)
 
-	route.GET("/:id/submission", controller.GetSubmission)
-	route.POST("/:id/submission", controller.Submission)
+	assessments.GET("/:id/submission", controller.GetSubmission)
+	assessments.POST("/:id/submission", controller.Submission)
+
+	submission := api.Group("/submissions")
+	{
+		submission.PATCH("/:id", controller.UpdateSubmission)
+	}
 }

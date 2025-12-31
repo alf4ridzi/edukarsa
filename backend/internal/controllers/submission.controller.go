@@ -27,6 +27,35 @@ func NewSubmissionController(service services.SubmissionService) *SubmissionCont
 	return &SubmissionController{service: service}
 }
 
+func (c *SubmissionController) UpdateSubmission(ctx *gin.Context) {
+	var input models.EditSubmissionRequest
+	if err := ctx.ShouldBindJSON(&input); err != nil {
+		helpers.BadRequest(ctx, "bad request")
+		return
+	}
+
+	reqCtx, cancel := context.WithTimeout(ctx.Request.Context(), 2*time.Second)
+	defer cancel()
+
+	submissionIDString := ctx.Param("id")
+	submissionID, err := utils.ParseUUIDString(submissionIDString)
+	if err != nil {
+		helpers.BadRequest(ctx, "NOT UUID")
+		return
+	}
+
+	submission, err := c.service.EvaluateSubmission(reqCtx, submissionID, input)
+	if err != nil {
+		switch {
+		default:
+			helpers.InternalServerError(ctx, "internal server error")
+		}
+		return
+	}
+
+	helpers.OK(ctx, "berhasil evaluate tugas", submission)
+}
+
 func (c *SubmissionController) GetSubmission(ctx *gin.Context) {
 	reqCtx, cancel := context.WithTimeout(ctx.Request.Context(), 2*time.Second)
 	defer cancel()

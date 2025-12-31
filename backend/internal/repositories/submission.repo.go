@@ -10,22 +10,34 @@ import (
 
 type SubmissionRepo interface {
 	Create(ctx context.Context, submission *models.AssessmentSubmission) error
+	Update(ctx context.Context, submission *models.AssessmentSubmission) error
 	FindAllByAssessmentID(ctx context.Context, assessmentID uuid.UUID) ([]models.AssessmentSubmission, error)
+	FindByID(ctx context.Context, id uuid.UUID) (*models.AssessmentSubmission, error)
 }
 
-type SubmissionRepoImpl struct {
+type submissionRepoImpl struct {
 	DB *gorm.DB
 }
 
 func NewSubmissionRepo(db *gorm.DB) SubmissionRepo {
-	return &SubmissionRepoImpl{DB: db}
+	return &submissionRepoImpl{DB: db}
 }
 
-func (r *SubmissionRepoImpl) Create(ctx context.Context, submission *models.AssessmentSubmission) error {
+func (r *submissionRepoImpl) FindByID(ctx context.Context, id uuid.UUID) (*models.AssessmentSubmission, error) {
+	var submission models.AssessmentSubmission
+	err := r.DB.WithContext(ctx).First(&submission, "id = ?", id).Error
+	return &submission, err
+}
+
+func (r *submissionRepoImpl) Update(ctx context.Context, submission *models.AssessmentSubmission) error {
+	return r.DB.WithContext(ctx).Model(submission).Updates(submission).Error
+}
+
+func (r *submissionRepoImpl) Create(ctx context.Context, submission *models.AssessmentSubmission) error {
 	return r.DB.WithContext(ctx).Create(submission).Error
 }
 
-func (r *SubmissionRepoImpl) FindAllByAssessmentID(ctx context.Context, assessmentID uuid.UUID) ([]models.AssessmentSubmission, error) {
+func (r *submissionRepoImpl) FindAllByAssessmentID(ctx context.Context, assessmentID uuid.UUID) ([]models.AssessmentSubmission, error) {
 	var submissions []models.AssessmentSubmission
 	err := r.DB.WithContext(ctx).Preload("Assessment").Find(&submissions, "assessment_id = ?", assessmentID).Error
 	return submissions, err
