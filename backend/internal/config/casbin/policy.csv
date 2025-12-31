@@ -6,6 +6,8 @@ p, admin, /api/*, (GET|POST|PUT|PATCH|DELETE)
 # =====================
 # TEACHER
 # =====================
+p, teacher, /api/users/me, (GET|PATCH)
+
 p, teacher, /api/classes, (GET|POST)
 p, teacher, /api/classes/:id, (GET|PUT|DELETE)
 p, teacher, /api/classes/code/:code/join, (POST)
@@ -14,6 +16,8 @@ p, teacher, /api/classes/:id/assessment, (GET|POST)
 p, teacher, /api/assessments/:id/submission, (GET)
 p, teacher, /api/assessments/:id, DELETE
 p, teacher, /api/submissions/:id, PATCH
+p, teacher, /api/exams, POST
+p, teacher, /api/classes/:id/exams, GET
 
 # =====================
 # STUDENT
@@ -27,6 +31,7 @@ p, student, /api/classes, GET
 p, student, /api/classes/:id/assessment, GET
 p, student, /api/classes/code/:code/join, POST
 p, student, /api/classes/code/:code/leave, DELETE
+p, student, /api/classes/:id/exams, GET
 
 # assessment
 p, student, /api/assessments/:id/submission, POST

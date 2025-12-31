@@ -13,12 +13,13 @@ func NewExamRoutes(route *gin.RouterGroup, db *gorm.DB) {
 	examRepo := repositories.NewExamRepo(db)
 	classRepo := repositories.NewClassRepo(db)
 
-	examService := services.NewExamService(examRepo, classRepo)
+	examService := services.NewExamService(db, examRepo, classRepo)
 
 	examController := controllers.NewExamController(examService)
 
 	exams := route.Group("/exams")
 	{
 		exams.POST("", examController.Create)
+		exams.POST("/:id/questions")
 	}
 }

@@ -24,6 +24,34 @@ func NewClassController(service services.ClassService) *ClassController {
 	return &ClassController{service: service}
 }
 
+func (c *ClassController) GetExams(ctx *gin.Context) {
+	reqCtx, cancel := context.WithTimeout(ctx.Request.Context(), 2*time.Second)
+	defer cancel()
+
+	classIDString := ctx.Param("id")
+	classID, err := utils.ParseUUIDString(classIDString)
+
+	if err != nil {
+		helpers.BadRequest(ctx, "bad request")
+		return
+	}
+
+	exams, err := c.service.ListExamsByClassPublicID(reqCtx, classID)
+	if err != nil {
+		switch {
+		case errors.Is(err, gorm.ErrRecordNotFound):
+			helpers.ResponseJSON(ctx, http.StatusNotFound, false, "kelas tidak ditemukan", nil)
+		default:
+			log.Println(err)
+			helpers.InternalServerError(ctx, "internal server error")
+		}
+
+		return
+	}
+
+	helpers.OK(ctx, "berhasil mendapatkan exam", exams)
+}
+
 func (c *ClassController) GetAssessments(ctx *gin.Context) {
 	reqCtx, cancel := context.WithTimeout(ctx.Request.Context(), 2*time.Second)
 	defer cancel()

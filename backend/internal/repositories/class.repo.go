@@ -21,6 +21,7 @@ type ClassRepo interface {
 	CreateForClass(ctx context.Context, assessment *models.Assessment) error
 	FindByPublicID(ctx context.Context, publicID uuid.UUID) (*models.Class, error)
 	FindAssessmentsByID(ctx context.Context, classID uint) ([]models.Assessment, error)
+	FindExamsByClassID(ctx context.Context, classID uint) ([]models.Exam, error)
 }
 
 type classRepoImpl struct {
@@ -29,6 +30,12 @@ type classRepoImpl struct {
 
 func NewClassRepo(db *gorm.DB) ClassRepo {
 	return &classRepoImpl{DB: db}
+}
+
+func (r *classRepoImpl) FindExamsByClassID(ctx context.Context, classID uint) ([]models.Exam, error) {
+	var exams []models.Exam
+	err := r.DB.WithContext(ctx).Find(&exams, "class_id = ?", classID).Error
+	return exams, err
 }
 
 func (r *classRepoImpl) FindAssessmentsByID(ctx context.Context, classID uint) ([]models.Assessment, error) {

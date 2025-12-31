@@ -27,5 +27,6 @@ func NewClassRoutes(route *gin.RouterGroup, db *gorm.DB) {
 
 		class.POST("/:id/assessment", classController.CreateNewAssessment)
 		class.GET("/:id/assessment", classController.GetAssessments)
+		class.GET("/:id/exams", classController.GetExams)
 	}
 }

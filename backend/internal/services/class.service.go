@@ -17,6 +17,7 @@ type ClassService interface {
 	LeaveClass(ctx context.Context, classCode string, userID uint64) error
 	CreateNewAssessment(ctx context.Context, publicID uuid.UUID, input *models.CreateAssessmentRequest) (*models.Assessment, error)
 	ListAssessmentByPublicID(ctx context.Context, publicID uuid.UUID) ([]models.Assessment, error)
+	ListExamsByClassPublicID(ctx context.Context, publicID uuid.UUID) ([]models.Exam, error)
 }
 
 type classServiceImpl struct {
@@ -25,6 +26,16 @@ type classServiceImpl struct {
 
 func NewClassService(repo repositories.ClassRepo) ClassService {
 	return &classServiceImpl{repo: repo}
+}
+
+func (s *classServiceImpl) ListExamsByClassPublicID(ctx context.Context, publicID uuid.UUID) ([]models.Exam, error) {
+	class, err := s.repo.FindByPublicID(ctx, publicID)
+	if err != nil {
+		return nil, err
+	}
+
+	exams, err := s.repo.FindExamsByClassID(ctx, class.ID)
+	return exams, err
 }
 
 func (s *classServiceImpl) ListAssessmentByPublicID(ctx context.Context, publicID uuid.UUID) ([]models.Assessment, error) {

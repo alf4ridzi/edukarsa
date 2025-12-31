@@ -9,7 +9,7 @@ import (
 
 type Assessment struct {
 	ID         uuid.UUID `gorm:"primaryKey;type:uuid;default:gen_random_uuid();uniqueIndex" json:"id"`
-	Name       string    `json:"name" json:"name"`
+	Name       string    `json:"name"`
 	DeadlineAt time.Time `json:"deadline_at"`
 
 	ClassID uint  `json:"-"`
