@@ -21,12 +21,12 @@ type CreateExamQuestionRequest struct {
 }
 
 type ExamQuestionResponse struct {
-	ID              uint     `json:"id"`
-	Question        string   `json:"question" binding:"required"`
-	Explanation     *string  `json:"explanation"`
-	Options         []string `json:"options" binding:"required,min=2"`
-	CorrectOptionID uint     `json:"correct_option_id" binding:"required"`
-	CreatedAt       time.Time
+	ID              uint                 `json:"id"`
+	Question        string               `json:"question" binding:"required"`
+	Explanation     *string              `json:"explanation"`
+	Options         []ExamOptionResponse `json:"options" binding:"required,min=2"`
+	CorrectOptionID uint                 `json:"correct_option_id" binding:"required"`
+	CreatedAt       time.Time            `json:"created_at"`
 }
 
 type ExamOptionResponse struct {

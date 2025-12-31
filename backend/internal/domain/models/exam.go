@@ -31,17 +31,17 @@ type ExamQuestion struct {
 	ExamID uuid.UUID `gorm:"type:uuid;index;not null"`
 	Exam   *Exam     `gorm:"foreignKey:ExamID"`
 
-	Question    string `gorm:"type:text;not null"`
-	Explanation *string
+	Question    string  `gorm:"type:text;not null" json:"question"`
+	Explanation *string `json:"explanation"`
 
 	AnswerID *uint       `json:"-"`
 	Answer   *ExamOption `gorm:"-"`
 
-	Options []ExamOption `gorm:"foreignKey:ExamQuestionID"`
+	Options []ExamOption `gorm:"foreignKey:ExamQuestionID" json:"options"`
 
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt gorm.DeletedAt `gorm:"index"`
+	CreatedAt time.Time      `json:"created_at"`
+	UpdatedAt time.Time      `json:"updated_at"`
+	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 }
 
 type ExamOption struct {

@@ -20,6 +20,6 @@ func NewExamRoutes(route *gin.RouterGroup, db *gorm.DB) {
 	exams := route.Group("/exams")
 	{
 		exams.POST("", examController.Create)
-		exams.POST("/:id/questions")
+		exams.POST("/:id/questions", examController.CreateQuestions)
 	}
 }

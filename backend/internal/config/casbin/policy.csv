@@ -18,6 +18,7 @@ p, teacher, /api/assessments/:id, DELETE
 p, teacher, /api/submissions/:id, PATCH
 p, teacher, /api/exams, POST
 p, teacher, /api/classes/:id/exams, GET
+p, teacher, /api/exams/:id/questions, (GET|POST)
 
 # =====================
 # STUDENT
@@ -32,6 +33,7 @@ p, student, /api/classes/:id/assessment, GET
 p, student, /api/classes/code/:code/join, POST
 p, student, /api/classes/code/:code/leave, DELETE
 p, student, /api/classes/:id/exams, GET
+p, teacher, /api/exams/:id/questions, GET
 
 # assessment
 p, student, /api/assessments/:id/submission, POST

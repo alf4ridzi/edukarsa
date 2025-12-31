@@ -23,6 +23,10 @@ func NewExamController(service services.ExamService) *ExamController {
 	return &ExamController{service: service}
 }
 
+func (c *ExamController) GetQuestions(ctx *gin.Context) {
+
+}
+
 func (c *ExamController) CreateQuestions(ctx *gin.Context) {
 	var input []dto.CreateExamQuestionRequest
 	if err := ctx.ShouldBindJSON(&input); err != nil {

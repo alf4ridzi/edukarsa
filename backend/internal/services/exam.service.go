@@ -27,7 +27,6 @@ func NewExamService(db *gorm.DB, repo repositories.ExamRepo, classRepo repositor
 }
 
 func (s *ExamServiceImpl) CreateQuestions(ctx context.Context, examID uuid.UUID, input []dto.CreateExamQuestionRequest) ([]dto.ExamQuestionResponse, error) {
-
 	exam, err := s.repo.FindExamByID(ctx, examID)
 	if err != nil {
 		return nil, err
@@ -84,13 +83,16 @@ func (s *ExamServiceImpl) CreateQuestions(ctx context.Context, examID uuid.UUID,
 			}
 
 			responses = append(responses, dto.ExamQuestionResponse{
-				ID:        question.ID,
-				Question:  question.Question,
-				Options:   respOptions,
-				CreatedAt: question.CreatedAt,
+				ID:              question.ID,
+				Explanation:     question.Explanation,
+				Question:        question.Question,
+				Options:         respOptions,
+				CorrectOptionID: *question.AnswerID,
+				CreatedAt:       question.CreatedAt,
 			})
 		}
 
+		return nil
 	})
 
 	if err != nil {
