@@ -10,10 +10,13 @@ import (
 type Exam struct {
 	ID uuid.UUID `gorm:"primaryKey;type:uuid;default:gen_random_uuid()" json:"id"`
 
-	Name     string    `gorm:"not null" json:"name"`
-	StartAt  time.Time `gorm:"not null" json:"start_at"`
-	Duration int       `gorm:"not null" json:"duration"`
-	Status   string    `gorm:"not null;default:'draft'" json:"status"`
+	Name string `gorm:"not null" json:"name"`
+
+	StartAt time.Time `gorm:"not null" json:"start_at"`
+	EndAt   time.Time `gorm:"not null" json:"end_at"`
+
+	Duration int    `gorm:"not null" json:"duration"`
+	Status   string `gorm:"not null;default:'draft'" json:"status"`
 
 	ClassID uint   `json:"-"`
 	Class   *Class `gorm:"foreignKey:ClassID" json:"class,omitempty"`
@@ -23,6 +26,12 @@ type Exam struct {
 	CreatedAt time.Time      `json:"created_at"`
 	UpdatedAt time.Time      `json:"updated_at"`
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
+}
+
+func (e *Exam) BeforeCreate(tx *gorm.DB) (err error) {
+	e.StartAt = e.StartAt.UTC()
+	e.EndAt = e.EndAt.UTC()
+	return
 }
 
 type ExamQuestion struct {

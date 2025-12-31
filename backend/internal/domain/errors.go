@@ -14,4 +14,6 @@ var (
 	ErrFileSizeTooBig      = errors.New("ukuran file terlalu besar")
 	ErrMinimumOption       = errors.New("minimal pilihan adalah 2")
 	ErrInvalidCorrectIndex = errors.New("jawaban opsi tidak benar")
+	ErrExamNotStarted      = errors.New("ujian belum dimulai")
+	ErrExamAlreadyFinished = errors.New("ujian sudah selesai")
 )

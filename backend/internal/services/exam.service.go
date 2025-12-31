@@ -7,6 +7,7 @@ import (
 	"edukarsa-backend/internal/domain/models"
 	"edukarsa-backend/internal/mapper"
 	"edukarsa-backend/internal/repositories"
+	"time"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -32,6 +33,16 @@ func (s *examServiceImpl) ListExamQuestions(ctx context.Context, examID uuid.UUI
 	exam, err := s.repo.FindExamByID(ctx, examID)
 	if err != nil {
 		return nil, err
+	}
+
+	now := time.Now().UTC()
+
+	if exam.StartAt.After(now) {
+		return nil, domain.ErrExamNotStarted
+	}
+
+	if now.After(exam.EndAt) {
+		return nil, domain.ErrExamAlreadyFinished
 	}
 
 	questions, err := s.repo.ListQuestionsByExamID(ctx, exam.ID)
@@ -132,6 +143,7 @@ func (s *examServiceImpl) CreateNewExam(ctx context.Context, userID uint, input 
 		Duration: input.Duration,
 		Status:   "draft",
 		ClassID:  class.ID,
+		EndAt:    input.EndAt,
 	}
 
 	err = s.repo.Create(ctx, &exam)

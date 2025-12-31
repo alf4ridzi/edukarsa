@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"context"
+	"edukarsa-backend/internal/domain"
 	"edukarsa-backend/internal/domain/dto"
 	"edukarsa-backend/internal/helpers"
 	"edukarsa-backend/internal/services"
@@ -38,6 +39,10 @@ func (c *ExamController) GetQuestions(ctx *gin.Context) {
 		switch {
 		case errors.Is(err, gorm.ErrRecordNotFound):
 			helpers.ResponseJSON(ctx, http.StatusNotFound, false, "ujian tidak ditemukan", nil)
+		case errors.Is(err, domain.ErrExamNotStarted):
+			helpers.ResponseJSON(ctx, http.StatusForbidden, false, err.Error(), nil)
+		case errors.Is(err, domain.ErrExamAlreadyFinished):
+			helpers.ResponseJSON(ctx, http.StatusForbidden, false, err.Error(), nil)
 		default:
 			log.Println(err)
 			helpers.InternalServerError(ctx, "internal server error")
