@@ -1,20 +1,17 @@
+import AuthInput from "@/components/auth/AuthInput";
 import { useAuthActions } from "@/hooks/useAuthAction";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { router } from "expo-router";
 import { useState } from "react";
 import { Alert, Image, Text, TouchableOpacity, View } from "react-native";
-import AuthInput from "../../components/auth/AuthInput";
-import { AuthStackParamList } from "../../navigation/AuthNavigator";
-
-type Props = NativeStackScreenProps<AuthStackParamList, "Register">;
 
 const LOGO = require("@/assets/images/logo-remove-bg.png");
 
-export default function RegisterScreen({ navigation }: Props) {
+export default function RegisterScreen() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmpassword, setConfirmPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const { registerReq } = useAuthActions();
 
@@ -30,26 +27,22 @@ export default function RegisterScreen({ navigation }: Props) {
     try {
       setLoading(true);
 
-      if (password !== confirmpassword) {
-        Alert.alert("terjadi kesalahan", "Password tidak sama");
-        return;
-      }
-
       await registerReq({
         name,
-        username,
         email,
+        username,
         password,
-        confirmpassword,
+        confirmpassword: confirmPassword,
       });
 
-      Alert.alert("Berhasil", "Berhasil register, silahkan login");
+      Alert.alert("Berhasil", "Registrasi berhasil! Silakan login.", [
+        { text: "OK", onPress: () => router.replace("/auth/login") },
+      ]);
       clearForm();
     } catch (err: any) {
-      console.log(err);
       Alert.alert(
-        "Register gagal",
-        err?.response?.data?.message ?? "Terjadi kesalahan"
+        "Registrasi gagal",
+        err?.response?.data?.message || err.message
       );
     } finally {
       setLoading(false);
@@ -58,13 +51,13 @@ export default function RegisterScreen({ navigation }: Props) {
 
   return (
     <View className="flex-1 bg-white px-8 justify-center">
-      <View className="items-center mb-10">
-        <Image source={LOGO} className="w-48 h-48 mb-4" resizeMode="contain" />
+      <View className="items-center mb-8">
+        <Image source={LOGO} className="w-32 h-32 mb-3" resizeMode="contain" />
         <Text className="text-xl font-bold text-slate-800">
           Daftar ke Edukarsa
         </Text>
         <Text className="text-slate-500 mt-2">
-          Memulai itu sulit, namun sangat penting!
+          Mari bergabung dengan komunitas kami!
         </Text>
       </View>
 
@@ -74,18 +67,22 @@ export default function RegisterScreen({ navigation }: Props) {
         value={name}
         onChangeText={setName}
       />
+
+      <AuthInput
+        icon="mail"
+        placeholder="Email"
+        value={email}
+        onChangeText={setEmail}
+        keyboardType="email-address"
+      />
+
       <AuthInput
         icon="user"
         placeholder="Username"
         value={username}
         onChangeText={setUsername}
       />
-      <AuthInput
-        icon="envelope"
-        placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
-      />
+
       <AuthInput
         icon="lock"
         placeholder="Password"
@@ -93,11 +90,12 @@ export default function RegisterScreen({ navigation }: Props) {
         value={password}
         onChangeText={setPassword}
       />
+
       <AuthInput
         icon="lock"
         placeholder="Konfirmasi Password"
         secureTextEntry
-        value={confirmpassword}
+        value={confirmPassword}
         onChangeText={setConfirmPassword}
       />
 
@@ -109,14 +107,11 @@ export default function RegisterScreen({ navigation }: Props) {
         }`}
       >
         <Text className="text-center text-white text-lg font-semibold">
-          {loading ? "Loading..." : "Register"}
+          {loading ? "Loading..." : "Daftar"}
         </Text>
       </TouchableOpacity>
 
-      <TouchableOpacity
-        className="mt-6"
-        onPress={() => navigation.navigate("Login")}
-      >
+      <TouchableOpacity className="mt-6" onPress={() => router.back()}>
         <Text className="text-center text-slate-600">
           Sudah punya akun? <Text className="text-blue-500">Login</Text>
         </Text>

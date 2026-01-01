@@ -9,6 +9,15 @@ export type LoginResponse = {
   data: {
     access_token: string;
     refresh_token: string;
+    user?: {
+      name: string;
+      email: string;
+      username?: string;
+      role?: {
+        id?: number | bigint;
+        name: string;
+      };
+    };
   };
 };
 

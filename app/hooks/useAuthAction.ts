@@ -18,7 +18,14 @@ export const useAuthActions = () => {
     }
 
     await saveTokens(res.data.access_token, res.data.refresh_token);
-    await login(res.data.access_token);
+
+    // Pass full user data including role
+    const userData = res.data.user || {
+      name: payload.identifier,
+      email: payload.identifier.includes("@") ? payload.identifier : "",
+    };
+
+    await login(res.data.access_token, userData);
   };
 
   const registerReq = async (payload: RegisterRequest) => {
