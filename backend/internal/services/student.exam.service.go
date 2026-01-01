@@ -22,10 +22,15 @@ type StudentExamService interface {
 type studentExamServiceImpl struct {
 	studentExamRepo repositories.StudentExamRepo
 	examRepo        repositories.ExamRepo
+	optionRepo      repositories.OptionRepo
 }
 
-func NewStudentExamService(studentExamRepo repositories.StudentExamRepo, examRepo repositories.ExamRepo) StudentExamService {
-	return &studentExamServiceImpl{studentExamRepo: studentExamRepo, examRepo: examRepo}
+func NewStudentExamService(studentExamRepo repositories.StudentExamRepo,
+	examRepo repositories.ExamRepo,
+	optionRepo repositories.OptionRepo) StudentExamService {
+	return &studentExamServiceImpl{studentExamRepo: studentExamRepo,
+		examRepo:   examRepo,
+		optionRepo: optionRepo}
 }
 
 func (s *studentExamServiceImpl) AnswerQuestion(
@@ -38,8 +43,8 @@ func (s *studentExamServiceImpl) AnswerQuestion(
 		return err
 	}
 
+	//question, err := s.qu
 	log.Println(exam)
-
 	return nil
 }
 

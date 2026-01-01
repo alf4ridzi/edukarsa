@@ -4,21 +4,20 @@ import (
 	"edukarsa-backend/internal/config"
 	"edukarsa-backend/internal/middlewares"
 	"fmt"
-	"time"
 
 	"github.com/casbin/casbin/v2"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
-func Run(cfg *config.Config, router *gin.Engine) {
-	router.Run(fmt.Sprintf("%s:%d", cfg.ServerHost, cfg.ServerPort))
+func Run(router *gin.Engine) {
+	router.Run(fmt.Sprintf("%s:%d", config.AppConfig.ServerHost, config.AppConfig.ServerPort))
 }
 
-func SetupRoute(cfg *config.Config, db *gorm.DB, enforcer *casbin.Enforcer) {
+func SetupRoute(db *gorm.DB, enforcer *casbin.Enforcer) {
 	route := gin.Default()
 
-	route.Use(middlewares.TimeoutMiddleware(time.Duration(config.AppConfig.ContextRequestTimeout)))
+	route.Use(middlewares.TimeoutMiddleware(config.AppConfig.ContextRequestTimeout))
 
 	NewStaticRoute(route)
 
@@ -35,5 +34,5 @@ func SetupRoute(cfg *config.Config, db *gorm.DB, enforcer *casbin.Enforcer) {
 	NewExamRoutes(protected, db)
 	NewStudentRoutes(protected, db)
 
-	Run(cfg, route)
+	Run(route)
 }

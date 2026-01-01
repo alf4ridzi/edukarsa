@@ -70,5 +70,5 @@ func main() {
 		log.Fatal(err)
 	}
 
-	routes.SetupRoute(cfg, db, enforcer)
+	routes.SetupRoute(db, enforcer)
 }
