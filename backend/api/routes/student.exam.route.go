@@ -16,7 +16,8 @@ func NewStudentExamRoutes(route *gin.RouterGroup, db *gorm.DB) {
 
 	exams := route.Group("/exams")
 	{
-		exams.GET("/:id/questions", studentExamController.GetQuestions)
-		exams.GET("/:id", studentExamController.GetExams)
+		exams.GET("/:exam_id/questions", studentExamController.GetQuestions)
+		exams.GET("/:exam_id", studentExamController.GetExams)
+		exams.PUT("/exams/:exam_id/questions/:question_id/answer")
 	}
 }

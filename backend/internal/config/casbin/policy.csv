@@ -42,6 +42,7 @@ p, student, /api/assessments/:id/submission, POST
 p, student, /api/student/exams/:id/questions, GET
 p, student, /api/student/exams/:id, GET
 p, student, /api/student/classess/:id/exams, GET
+p, student, /api/student/exams/exams/:exam_id/questions/:question_id/answer, PUT
 
 # =====================
 # ROLE MAPPING

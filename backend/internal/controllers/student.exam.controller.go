@@ -1,12 +1,15 @@
 package controllers
 
 import (
+	"context"
 	"edukarsa-backend/internal/domain"
+	"edukarsa-backend/internal/domain/dto"
 	"edukarsa-backend/internal/helpers"
 	"edukarsa-backend/internal/services"
 	"errors"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -30,8 +33,29 @@ func (c *StudentExamController) GetExams(ctx *gin.Context) {
 
 }
 
+func (c *StudentClassessController) AnswerQuestion(ctx *gin.Context) {
+	var input dto.StudentAnswerRequest
+	if err := ctx.ShouldBindJSON(&input); err != nil {
+		helpers.BadRequest(ctx, "bad request")
+		return
+	}
+
+	examID, err := uuid.Parse(ctx.Param("exam_id"))
+	if err != nil {
+		helpers.BadRequest(ctx, "exam id tidak valid")
+		return
+	}
+
+	questionID, err := uuid.Parse(ctx.Param("question_id"))
+	if err != nil {
+		helpers.BadRequest(ctx, "question id tidak valid")
+		return
+	}
+
+}
+
 func (c *StudentExamController) GetQuestions(ctx *gin.Context) {
-	examID, err := uuid.Parse(ctx.Param("id"))
+	examID, err := uuid.Parse(ctx.Param("exam_id"))
 	if err != nil {
 		helpers.BadRequest(ctx, "exam id is not valid")
 		return
