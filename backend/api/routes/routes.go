@@ -30,6 +30,7 @@ func SetupRoute(cfg *config.Config, db *gorm.DB, enforcer *casbin.Enforcer) {
 	NewClassRoutes(protected, db)
 	NewAssessmentRoutes(protected, db)
 	NewExamRoutes(protected, db)
+	NewStudentRoutes(protected, db)
 
 	Run(cfg, route)
 }

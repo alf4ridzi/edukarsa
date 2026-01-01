@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -22,6 +23,35 @@ type ExamController struct {
 
 func NewExamController(service services.ExamService) *ExamController {
 	return &ExamController{service: service}
+}
+
+func (c *ExamController) UpdateExam(ctx *gin.Context) {
+	examID, err := uuid.Parse(ctx.Param("id"))
+	if err != nil {
+		helpers.BadRequest(ctx, "exam id is not valid")
+		return
+	}
+
+	var input dto.ExamUpdateRequest
+	if err := ctx.ShouldBindJSON(&input); err != nil {
+		helpers.BadRequest(ctx, "bad request")
+		return
+	}
+
+	reqCtx, cancel := context.WithTimeout(ctx.Request.Context(), 2*time.Second)
+	defer cancel()
+
+	exam, err := c.service.UpdateExam(reqCtx, examID, input)
+	if err != nil {
+		switch {
+		default:
+			log.Println(err)
+			helpers.InternalServerError(ctx, "internal server error")
+		}
+		return
+	}
+
+	helpers.OK(ctx, "berhasil memperbarui ujian", exam)
 }
 
 func (c *ExamController) GetQuestions(ctx *gin.Context) {

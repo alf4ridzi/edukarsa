@@ -15,6 +15,7 @@ type ExamRepo interface {
 	CreateQuestion(ctx context.Context, tx *gorm.DB, question *models.ExamQuestion) error
 	UpdateQuestion(ctx context.Context, tx *gorm.DB, question *models.ExamQuestion) error
 	ListQuestionsByExamID(ctx context.Context, id uuid.UUID) ([]models.ExamQuestion, error)
+	Update(ctx context.Context, exam *models.Exam) error
 }
 
 type examRepoImpl struct {
@@ -23,6 +24,10 @@ type examRepoImpl struct {
 
 func NewExamRepo(db *gorm.DB) ExamRepo {
 	return &examRepoImpl{DB: db}
+}
+
+func (r *examRepoImpl) Update(ctx context.Context, exam *models.Exam) error {
+	return r.DB.WithContext(ctx).Updates(exam).Error
 }
 
 func (r *examRepoImpl) ListQuestionsByExamID(ctx context.Context, id uuid.UUID) ([]models.ExamQuestion, error) {

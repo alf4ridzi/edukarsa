@@ -16,4 +16,5 @@ var (
 	ErrInvalidCorrectIndex = errors.New("jawaban opsi tidak benar")
 	ErrExamNotStarted      = errors.New("ujian belum dimulai")
 	ErrExamAlreadyFinished = errors.New("ujian sudah selesai")
+	ErrExamNotAccessible   = errors.New("ujian belum dapat diakses")
 )

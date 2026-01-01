@@ -35,8 +35,20 @@ type ExamOptionResponse struct {
 	Text string `json:"text"`
 }
 
-type ExamQuestionStudentResponse struct {
-	ID       uint                 `json:"id"`
-	Question string               `json:"question"`
-	Options  []ExamOptionResponse `json:"options"`
+type ExamQuestionTeacherResponse struct {
+	ID              uint                 `json:"id"`
+	Question        string               `json:"question"`
+	Options         []ExamOptionResponse `json:"options"`
+	CorrectOptionID uint                 `json:"correct_option_id"`
+	CreatedAt       time.Time            `json:"created_at"`
+}
+
+type ExamUpdateRequest struct {
+	Name *string `json:"name"`
+
+	StartAt *time.Time `json:"start_at"`
+	EndAt   *time.Time `json:"end_at"`
+
+	Duration *int    `json:"duration"`
+	Status   *string `json:"status"`
 }

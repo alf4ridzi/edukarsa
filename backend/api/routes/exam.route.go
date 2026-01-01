@@ -22,5 +22,6 @@ func NewExamRoutes(route *gin.RouterGroup, db *gorm.DB) {
 		exams.POST("", examController.Create)
 		exams.POST("/:id/questions", examController.CreateQuestions)
 		exams.GET("/:id/questions", examController.GetQuestions)
+		exams.PATCH("/:id", examController.UpdateExam)
 	}
 }

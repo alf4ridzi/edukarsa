@@ -22,3 +22,23 @@ func ToStudentQuestionResponse(q models.ExamQuestion) dto.ExamQuestionStudentRes
 		Options:  opts,
 	}
 }
+
+func ToTeacherQuestionResponse(q models.ExamQuestion) dto.ExamQuestionTeacherResponse {
+
+	opts := make([]dto.ExamOptionResponse, 0, len(q.Options))
+
+	for _, opt := range q.Options {
+		opts = append(opts, dto.ExamOptionResponse{
+			ID:   opt.ID,
+			Text: opt.Option,
+		})
+	}
+
+	return dto.ExamQuestionTeacherResponse{
+		ID:              q.ID,
+		Question:        q.Question,
+		Options:         opts,
+		CreatedAt:       q.CreatedAt,
+		CorrectOptionID: *q.AnswerID,
+	}
+}

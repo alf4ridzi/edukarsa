@@ -7,7 +7,6 @@ import (
 	"edukarsa-backend/internal/domain/models"
 	"edukarsa-backend/internal/mapper"
 	"edukarsa-backend/internal/repositories"
-	"time"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -16,7 +15,8 @@ import (
 type ExamService interface {
 	CreateNewExam(ctx context.Context, userID uint, input dto.CreateExamRequest) (*models.Exam, error)
 	CreateQuestions(ctx context.Context, examID uuid.UUID, input []dto.CreateExamQuestionRequest) ([]dto.ExamQuestionResponse, error)
-	ListExamQuestions(ctx context.Context, examID uuid.UUID) ([]dto.ExamQuestionStudentResponse, error)
+	ListExamQuestions(ctx context.Context, examID uuid.UUID) ([]dto.ExamQuestionTeacherResponse, error)
+	UpdateExam(ctx context.Context, examID uuid.UUID, input dto.ExamUpdateRequest) (*models.Exam, error)
 }
 
 type examServiceImpl struct {
@@ -29,27 +29,57 @@ func NewExamService(db *gorm.DB, repo repositories.ExamRepo, classRepo repositor
 	return &examServiceImpl{DB: db, repo: repo, classRepo: classRepo}
 }
 
-func (s *examServiceImpl) ListExamQuestions(ctx context.Context, examID uuid.UUID) ([]dto.ExamQuestionStudentResponse, error) {
+func (s *examServiceImpl) UpdateExam(ctx context.Context, examID uuid.UUID, input dto.ExamUpdateRequest) (*models.Exam, error) {
 	exam, err := s.repo.FindExamByID(ctx, examID)
 	if err != nil {
 		return nil, err
 	}
 
-	now := time.Now().UTC()
-
-	if exam.StartAt.After(now) {
-		return nil, domain.ErrExamNotStarted
+	if input.Name != nil {
+		exam.Name = *input.Name
 	}
 
-	if now.After(exam.EndAt) {
-		return nil, domain.ErrExamAlreadyFinished
+	if input.Status != nil {
+		exam.Status = *input.Status
 	}
+
+	if input.Duration != nil {
+		exam.Duration = *input.Duration
+	}
+
+	if input.StartAt != nil {
+		exam.StartAt = *input.StartAt
+	}
+
+	if input.EndAt != nil {
+		exam.EndAt = *input.EndAt
+	}
+
+	err = s.repo.Update(ctx, exam)
+	return exam, err
+}
+
+func (s *examServiceImpl) ListExamQuestions(ctx context.Context, examID uuid.UUID) ([]dto.ExamQuestionTeacherResponse, error) {
+	exam, err := s.repo.FindExamByID(ctx, examID)
+	if err != nil {
+		return nil, err
+	}
+
+	// now := time.Now().UTC()
+
+	// if exam.StartAt.After(now) {
+	// 	return nil, domain.ErrExamNotStarted
+	// }
+
+	// if now.After(exam.EndAt) {
+	// 	return nil, domain.ErrExamAlreadyFinished
+	// }
 
 	questions, err := s.repo.ListQuestionsByExamID(ctx, exam.ID)
-	responses := make([]dto.ExamQuestionStudentResponse, 0, len(questions))
+	responses := make([]dto.ExamQuestionTeacherResponse, 0, len(questions))
 
 	for _, q := range questions {
-		responses = append(responses, mapper.ToStudentQuestionResponse(q))
+		responses = append(responses, mapper.ToTeacherQuestionResponse(q))
 	}
 
 	return responses, nil
