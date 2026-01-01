@@ -6,20 +6,41 @@ import (
 	"edukarsa-backend/internal/helpers"
 	"edukarsa-backend/internal/mapper"
 	"edukarsa-backend/internal/repositories"
+	"log"
 
 	"github.com/google/uuid"
 )
 
 type StudentExamService interface {
 	ListQuestions(ctx context.Context, examID uuid.UUID) ([]dto.ExamQuestionStudentResponse, error)
+	AnswerQuestion(
+		ctx context.Context,
+		examID uuid.UUID, questionID uuid.UUID,
+		input dto.StudentAnswerRequest) error
 }
 
 type studentExamServiceImpl struct {
 	studentExamRepo repositories.StudentExamRepo
+	examRepo        repositories.ExamRepo
 }
 
-func NewStudentExamService(studentExamRepo repositories.StudentExamRepo) StudentExamService {
-	return &studentExamServiceImpl{studentExamRepo: studentExamRepo}
+func NewStudentExamService(studentExamRepo repositories.StudentExamRepo, examRepo repositories.ExamRepo) StudentExamService {
+	return &studentExamServiceImpl{studentExamRepo: studentExamRepo, examRepo: examRepo}
+}
+
+func (s *studentExamServiceImpl) AnswerQuestion(
+	ctx context.Context,
+	examID uuid.UUID, questionID uuid.UUID,
+	input dto.StudentAnswerRequest) error {
+
+	exam, err := s.examRepo.FindExamByID(ctx, examID)
+	if err != nil {
+		return err
+	}
+
+	log.Println(exam)
+
+	return nil
 }
 
 func (s *studentExamServiceImpl) ListQuestions(ctx context.Context, examID uuid.UUID) ([]dto.ExamQuestionStudentResponse, error) {

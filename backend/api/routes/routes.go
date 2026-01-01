@@ -4,6 +4,7 @@ import (
 	"edukarsa-backend/internal/config"
 	"edukarsa-backend/internal/middlewares"
 	"fmt"
+	"time"
 
 	"github.com/casbin/casbin/v2"
 	"github.com/gin-gonic/gin"
@@ -17,7 +18,8 @@ func Run(cfg *config.Config, router *gin.Engine) {
 func SetupRoute(cfg *config.Config, db *gorm.DB, enforcer *casbin.Enforcer) {
 	route := gin.Default()
 
-	route.Use(middlewares.TimeoutMiddleware())
+	route.Use(middlewares.TimeoutMiddleware(time.Duration(config.AppConfig.ContextRequestTimeout)))
+
 	NewStaticRoute(route)
 
 	public := route.Group("/api")

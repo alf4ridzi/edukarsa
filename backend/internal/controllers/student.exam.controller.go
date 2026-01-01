@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"context"
 	"edukarsa-backend/internal/domain"
 	"edukarsa-backend/internal/domain/dto"
 	"edukarsa-backend/internal/helpers"
@@ -9,7 +8,6 @@ import (
 	"errors"
 	"log"
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -33,7 +31,7 @@ func (c *StudentExamController) GetExams(ctx *gin.Context) {
 
 }
 
-func (c *StudentClassessController) AnswerQuestion(ctx *gin.Context) {
+func (c *StudentExamController) AnswerQuestion(ctx *gin.Context) {
 	var input dto.StudentAnswerRequest
 	if err := ctx.ShouldBindJSON(&input); err != nil {
 		helpers.BadRequest(ctx, "bad request")
@@ -52,6 +50,16 @@ func (c *StudentClassessController) AnswerQuestion(ctx *gin.Context) {
 		return
 	}
 
+	err = c.studentExamService.AnswerQuestion(ctx.Request.Context(), examID, questionID, input)
+	if err != nil {
+		switch {
+		default:
+			helpers.InternalServerError(ctx, "internal server error")
+		}
+		return
+	}
+
+	helpers.OK(ctx, "berhasil menjawab soal", nil)
 }
 
 func (c *StudentExamController) GetQuestions(ctx *gin.Context) {
