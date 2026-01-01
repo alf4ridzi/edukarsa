@@ -1,5 +1,4 @@
 Edukarsa adalah platform pendidikan terpadu yang dirancang untuk memudahkan guru dalam mengajar, mengevaluasi, dan memahami kebutuhan belajar siswa secara menyeluruh.
-Dengan pendekatan berbasis teknologi dan kecerdasan buatan, Edukarsa membantu menciptakan proses pembelajaran yang efektif, interaktif, dan personal.
 
 Edukarsa tidak hanya menjadi alat bantu mengajar, tetapi juga mitra guru dalam menganalisis perkembangan siswa dan meningkatkan kualitas pembelajaran.
 
@@ -42,13 +41,6 @@ Fitur Utama :
 - Ringkasan otomatis setiap materi
 - Materi berbasis teks, video, dan infografis
 - Catatan belajar siswa tersimpan rapi
-
-7. Integrasi AI (DeepSeek)
-AI membantu:
-Menjawab pertanyaan siswa
-Membuat soal otomatis
-Memberi penjelasan materi sesuai level siswa
-Meringkas materi pelajaran
 
 Fitur Kreatif & Inovatif
 1. Analisis Kemampuan Siswa (Learning Analytics)
