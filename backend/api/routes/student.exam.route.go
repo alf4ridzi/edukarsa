@@ -13,8 +13,10 @@ func NewStudentExamRoutes(route *gin.RouterGroup, db *gorm.DB) {
 	studentExamRepo := repositories.NewStudentExamRepo(db)
 	examRepo := repositories.NewExamRepo(db)
 	optionRepo := repositories.NewOptionRepo(db)
+	questionRepo := repositories.NewQuestionRepo(db)
+	answerRepo := repositories.NewAnswerRepo(db)
 
-	studentExamService := services.NewStudentExamService(studentExamRepo, examRepo, optionRepo)
+	studentExamService := services.NewStudentExamService(studentExamRepo, examRepo, optionRepo, questionRepo, answerRepo)
 
 	studentExamController := controllers.NewStudentExamController(studentExamService)
 

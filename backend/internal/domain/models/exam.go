@@ -83,8 +83,6 @@ type ExamUserAnswer struct {
 
 	CreatedAt time.Time
 	UpdatedAt time.Time
-
-	_ struct{} `gorm:"uniqueIndex:uq_exam_user_question,priority:1"`
 }
 
 type ExamScore struct {

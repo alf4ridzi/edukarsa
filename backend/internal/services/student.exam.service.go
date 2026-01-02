@@ -2,11 +2,12 @@ package services
 
 import (
 	"context"
+	"edukarsa-backend/internal/domain"
 	"edukarsa-backend/internal/domain/dto"
+	"edukarsa-backend/internal/domain/models"
 	"edukarsa-backend/internal/helpers"
 	"edukarsa-backend/internal/mapper"
 	"edukarsa-backend/internal/repositories"
-	"log"
 
 	"github.com/google/uuid"
 )
@@ -15,37 +16,81 @@ type StudentExamService interface {
 	ListQuestions(ctx context.Context, examID uuid.UUID) ([]dto.ExamQuestionStudentResponse, error)
 	AnswerQuestion(
 		ctx context.Context,
-		examID uuid.UUID, questionID uuid.UUID,
-		input dto.StudentAnswerRequest) error
+		examID uuid.UUID, questionID uint,
+		input dto.StudentAnswerRequest,
+		userID uint) error
 }
 
 type studentExamServiceImpl struct {
 	studentExamRepo repositories.StudentExamRepo
 	examRepo        repositories.ExamRepo
 	optionRepo      repositories.OptionRepo
+	questionRepo    repositories.QuestionRepo
+	answerRepo      repositories.AnswerRepo
 }
 
 func NewStudentExamService(studentExamRepo repositories.StudentExamRepo,
 	examRepo repositories.ExamRepo,
-	optionRepo repositories.OptionRepo) StudentExamService {
+	optionRepo repositories.OptionRepo,
+	questionRepo repositories.QuestionRepo,
+	answerRepo repositories.AnswerRepo) StudentExamService {
 	return &studentExamServiceImpl{studentExamRepo: studentExamRepo,
-		examRepo:   examRepo,
-		optionRepo: optionRepo}
+		examRepo:     examRepo,
+		optionRepo:   optionRepo,
+		questionRepo: questionRepo,
+		answerRepo:   answerRepo}
 }
 
 func (s *studentExamServiceImpl) AnswerQuestion(
 	ctx context.Context,
-	examID uuid.UUID, questionID uuid.UUID,
-	input dto.StudentAnswerRequest) error {
+	examID uuid.UUID, questionID uint,
+	input dto.StudentAnswerRequest,
+	userID uint) error {
 
 	exam, err := s.examRepo.FindExamByID(ctx, examID)
 	if err != nil {
 		return err
 	}
 
-	//question, err := s.qu
-	log.Println(exam)
-	return nil
+	question, err := s.questionRepo.FindQuestionByID(ctx, questionID)
+	if err != nil {
+		return err
+	}
+
+	if question.ExamID != exam.ID {
+		return domain.ErrQuestionNotBelongToExam
+	}
+
+	option, err := s.optionRepo.FindOptionByID(ctx, input.OptionID)
+	if err != nil {
+		return err
+	}
+
+	if option.ExamQuestionID != question.ID {
+		return domain.ErrOptionNotBelongToQuestion
+	}
+
+	existing, err := s.answerRepo.FindByUserAndQuestion(ctx, exam.ID, question.ID, userID)
+	if err != nil {
+		return err
+	}
+
+	if existing != nil && existing.AnswerID == input.OptionID {
+		return domain.ErrSameAnswerSubmitted
+	}
+
+	if existing == nil {
+		answer := &models.ExamUserAnswer{
+			ExamID:         exam.ID,
+			UserID:         userID,
+			ExamQuestionID: question.ID,
+			AnswerID:       input.OptionID,
+		}
+
+		return s.answerRepo.Create(ctx, answer)
+	}
+
+	return s.answerRepo.UpdateAnswer(ctx, existing.ID, input.OptionID)
 }
 
 func (s *studentExamServiceImpl) ListQuestions(ctx context.Context, examID uuid.UUID) ([]dto.ExamQuestionStudentResponse, error) {

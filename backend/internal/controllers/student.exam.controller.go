@@ -8,6 +8,7 @@ import (
 	"errors"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -44,13 +45,18 @@ func (c *StudentExamController) AnswerQuestion(ctx *gin.Context) {
 		return
 	}
 
-	questionID, err := uuid.Parse(ctx.Param("question_id"))
+	questionIDUint64, err := strconv.ParseUint(ctx.Param("question_id"), 10, 64)
 	if err != nil {
 		helpers.BadRequest(ctx, "question id tidak valid")
 		return
 	}
 
-	err = c.studentExamService.AnswerQuestion(ctx.Request.Context(), examID, questionID, input)
+	questionID := uint(questionIDUint64)
+
+	userID := ctx.GetUint("user_id")
+	log.Println(userID)
+
+	err = c.studentExamService.AnswerQuestion(ctx.Request.Context(), examID, questionID, input, userID)
 	if err != nil {
 		switch {
 		default:
