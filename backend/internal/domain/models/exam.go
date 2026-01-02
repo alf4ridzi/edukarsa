@@ -85,14 +85,29 @@ type ExamUserAnswer struct {
 	UpdatedAt time.Time
 }
 
+type ExamSubmission struct {
+	ID uuid.UUID `gorm:"primaryKey;type:uuid;default:gen_random_uuid()" json:"id"`
+
+	ExamID uuid.UUID `gorm:"type:uuid;index;not null"`
+	UserID uint      `gorm:"index;not null"`
+
+	StartAt     time.Time
+	SubmittedAt *time.Time
+
+	Status string `gorm:"not null;default:'ongoing'"` // submitted, ongoing, expired
+
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+
 type ExamScore struct {
 	ID uuid.UUID `gorm:"primaryKey;type:uuid;default:gen_random_uuid()" json:"id"`
 
 	ExamID uuid.UUID `gorm:"type:uuid;not null;uniqueIndex:uq_exam_user_score"`
-	Exam   Exam      `gorm:"foreignKey:ExamID"`
+	Exam   *Exam     `gorm:"foreignKey:ExamID"`
 
-	UserID uint `gorm:"not null;uniqueIndex:uq_exam_user_score"`
-	User   User `gorm:"foreignKey:UserID"`
+	UserID uint  `gorm:"not null;uniqueIndex:uq_exam_user_score"`
+	User   *User `gorm:"foreignKey:UserID"`
 
 	Correct int `gorm:"not null"`
 	Wrong   int `gorm:"not null"`

@@ -22,6 +22,7 @@ var Migration = []any{
 	&models.ExamOption{},
 	&models.ExamUserAnswer{},
 	&models.ExamScore{},
+	&models.ExamSubmission{},
 }
 
 func ConnectDB() (*gorm.DB, error) {

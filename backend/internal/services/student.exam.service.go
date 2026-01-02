@@ -8,6 +8,7 @@ import (
 	"edukarsa-backend/internal/helpers"
 	"edukarsa-backend/internal/mapper"
 	"edukarsa-backend/internal/repositories"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -19,26 +20,61 @@ type StudentExamService interface {
 		examID uuid.UUID, questionID uint,
 		input dto.StudentAnswerRequest,
 		userID uint) error
+	StartExam(ctx context.Context, examID uuid.UUID, userID uint) error
 }
 
 type studentExamServiceImpl struct {
-	studentExamRepo repositories.StudentExamRepo
-	examRepo        repositories.ExamRepo
-	optionRepo      repositories.OptionRepo
-	questionRepo    repositories.QuestionRepo
-	answerRepo      repositories.AnswerRepo
+	studentExamRepo    repositories.StudentExamRepo
+	examRepo           repositories.ExamRepo
+	optionRepo         repositories.OptionRepo
+	questionRepo       repositories.QuestionRepo
+	answerRepo         repositories.AnswerRepo
+	examSubmissionRepo repositories.ExamSubmissionRepo
 }
 
 func NewStudentExamService(studentExamRepo repositories.StudentExamRepo,
 	examRepo repositories.ExamRepo,
 	optionRepo repositories.OptionRepo,
 	questionRepo repositories.QuestionRepo,
-	answerRepo repositories.AnswerRepo) StudentExamService {
+	answerRepo repositories.AnswerRepo,
+	examSubmissionRepo repositories.ExamSubmissionRepo) StudentExamService {
 	return &studentExamServiceImpl{studentExamRepo: studentExamRepo,
-		examRepo:     examRepo,
-		optionRepo:   optionRepo,
-		questionRepo: questionRepo,
-		answerRepo:   answerRepo}
+		examRepo:           examRepo,
+		optionRepo:         optionRepo,
+		questionRepo:       questionRepo,
+		answerRepo:         answerRepo,
+		examSubmissionRepo: examSubmissionRepo}
+}
+
+func (s *studentExamServiceImpl) StartExam(ctx context.Context, examID uuid.UUID, userID uint) error {
+	exam, err := s.examRepo.FindExamByID(ctx, examID)
+	if err != nil {
+		return err
+	}
+
+	exist, err := s.examSubmissionRepo.ExistByExamIDAndUserID(ctx, exam.ID, userID)
+	if err != nil {
+		return err
+	}
+
+	if exist {
+		return domain.ErrAlreadyStartExam
+	}
+
+	err = helpers.CanStudentStartExam(exam)
+	if err != nil {
+		return err
+	}
+
+	now := time.Now().UTC()
+
+	submission := &models.ExamSubmission{
+		ExamID:  exam.ID,
+		UserID:  userID,
+		StartAt: now,
+	}
+
+	return s.examSubmissionRepo.Create(ctx, submission)
 }
 
 func (s *studentExamServiceImpl) AnswerQuestion(
@@ -50,6 +86,20 @@ func (s *studentExamServiceImpl) AnswerQuestion(
 	exam, err := s.examRepo.FindExamByID(ctx, examID)
 	if err != nil {
 		return err
+	}
+
+	err = helpers.CanStudentStartExam(exam)
+	if err != nil {
+		return err
+	}
+
+	started, err := s.examSubmissionRepo.ExistByExamIDAndUserID(ctx, exam.ID, userID)
+	if err != nil {
+		return err
+	}
+
+	if !started {
+		return domain.ErrUserExamNotStarted
 	}
 
 	question, err := s.questionRepo.FindQuestionByID(ctx, questionID)

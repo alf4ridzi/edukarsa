@@ -20,4 +20,6 @@ var (
 	ErrQuestionNotBelongToExam   = errors.New("pertanyaan tidak valid dengan ujian")
 	ErrOptionNotBelongToQuestion = errors.New("opsi tidak valid dengan pertanyaan")
 	ErrSameAnswerSubmitted       = errors.New("opsi tidak boleh sama")
+	ErrAlreadyStartExam          = errors.New("sudah memulai ujian")
+	ErrUserExamNotStarted        = errors.New("ujian belum dimulai oleh user")
 )

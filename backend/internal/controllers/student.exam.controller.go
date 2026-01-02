@@ -23,14 +23,48 @@ func NewStudentExamController(studentExamService services.StudentExamService) *S
 	return &StudentExamController{studentExamService: studentExamService}
 }
 
-func (c *StudentExamController) GetExams(ctx *gin.Context) {
-	// examID, err := uuid.Parse(ctx.Param("id"))
-	// if err != nil {
-	// 	helpers.BadRequest(ctx, "exam id is not valid")
-	// 	return
-	// }
+func (c *StudentExamController) StartExam(ctx *gin.Context) {
+	examID, err := uuid.Parse(ctx.Param("exam_id"))
+	if err != nil {
+		helpers.BadRequest(ctx, "id ujian tidak valid")
+		return
+	}
 
+	userID := uint(ctx.GetUint64("user_id"))
+
+	err = c.studentExamService.StartExam(
+		ctx.Request.Context(),
+		examID,
+		userID,
+	)
+
+	if err != nil {
+		switch {
+		case errors.Is(err, domain.ErrExamNotStarted):
+			helpers.ResponseJSON(ctx, http.StatusConflict, false, err.Error(), nil)
+		case errors.Is(err, domain.ErrExamAlreadyFinished):
+			helpers.ResponseJSON(ctx, http.StatusConflict, false, err.Error(), nil)
+		case errors.Is(err, domain.ErrAlreadyStartExam):
+			helpers.ResponseJSON(ctx, http.StatusConflict, false, err.Error(), nil)
+		case errors.Is(err, domain.ErrUserExamNotStarted):
+			helpers.ResponseJSON(ctx, http.StatusConflict, false, err.Error(), nil)
+		default:
+			helpers.InternalServerError(ctx, "internal server error")
+		}
+		return
+	}
+
+	helpers.OK(ctx, "berhasil memulai ujian", nil)
 }
+
+// func (c *StudentExamController) GetExams(ctx *gin.Context) {
+// 	// examID, err := uuid.Parse(ctx.Param("id"))
+// 	// if err != nil {
+// 	// 	helpers.BadRequest(ctx, "exam id is not valid")
+// 	// 	return
+// 	// }
+
+// }
 
 func (c *StudentExamController) AnswerQuestion(ctx *gin.Context) {
 	var input dto.StudentAnswerRequest
@@ -65,6 +99,8 @@ func (c *StudentExamController) AnswerQuestion(ctx *gin.Context) {
 			helpers.ResponseJSON(ctx, http.StatusInternalServerError, false, err.Error(), nil)
 		case errors.Is(err, domain.ErrQuestionNotBelongToExam):
 			helpers.ResponseJSON(ctx, http.StatusInternalServerError, false, err.Error(), nil)
+		case errors.Is(err, domain.ErrUserExamNotStarted):
+			helpers.ResponseJSON(ctx, http.StatusConflict, false, err.Error(), nil)
 		default:
 			log.Println(err)
 			helpers.InternalServerError(ctx, "internal server error")
