@@ -16,4 +16,5 @@ type StudentExamResponse struct {
 	ID      uuid.UUID `json:"id"`
 	Name    string    `json:"name"`
 	StartAt time.Time `json:"start_at"`
+	EndAt   time.Time `json:"end_at"`
 }

@@ -51,6 +51,7 @@ func (s *studentClassessServiceImpl) GetExams(ctx context.Context, classPublicID
 			ID:      e.ID,
 			Name:    e.Name,
 			StartAt: e.StartAt,
+			EndAt:   e.EndAt,
 		}
 
 		responses = append(responses, resp)
