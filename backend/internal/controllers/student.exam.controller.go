@@ -53,13 +53,20 @@ func (c *StudentExamController) AnswerQuestion(ctx *gin.Context) {
 
 	questionID := uint(questionIDUint64)
 
-	userID := ctx.GetUint("user_id")
-	log.Println(userID)
+	userIDUint64 := ctx.GetUint64("user_id")
+	userID := uint(userIDUint64)
 
 	err = c.studentExamService.AnswerQuestion(ctx.Request.Context(), examID, questionID, input, userID)
 	if err != nil {
 		switch {
+		case errors.Is(err, domain.ErrOptionNotBelongToQuestion):
+			helpers.ResponseJSON(ctx, http.StatusInternalServerError, false, err.Error(), nil)
+		case errors.Is(err, domain.ErrSameAnswerSubmitted):
+			helpers.ResponseJSON(ctx, http.StatusInternalServerError, false, err.Error(), nil)
+		case errors.Is(err, domain.ErrQuestionNotBelongToExam):
+			helpers.ResponseJSON(ctx, http.StatusInternalServerError, false, err.Error(), nil)
 		default:
+			log.Println(err)
 			helpers.InternalServerError(ctx, "internal server error")
 		}
 		return

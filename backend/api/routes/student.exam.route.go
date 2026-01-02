@@ -24,6 +24,6 @@ func NewStudentExamRoutes(route *gin.RouterGroup, db *gorm.DB) {
 	{
 		exams.GET("/:exam_id/questions", studentExamController.GetQuestions)
 		exams.GET("/:exam_id", studentExamController.GetExams)
-		exams.PUT("/exams/:exam_id/questions/:question_id/answer")
+		exams.PUT("/:exam_id/questions/:question_id/answer", studentExamController.AnswerQuestion)
 	}
 }
