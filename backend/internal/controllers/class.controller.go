@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"context"
 	"edukarsa-backend/internal/domain"
 	"edukarsa-backend/internal/domain/models"
 	"edukarsa-backend/internal/helpers"
@@ -10,7 +9,6 @@ import (
 	"errors"
 	"log"
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -25,8 +23,6 @@ func NewClassController(service services.ClassService) *ClassController {
 }
 
 func (c *ClassController) GetExams(ctx *gin.Context) {
-	reqCtx, cancel := context.WithTimeout(ctx.Request.Context(), 2*time.Second)
-	defer cancel()
 
 	classIDString := ctx.Param("id")
 	classID, err := utils.ParseUUIDString(classIDString)
@@ -36,7 +32,7 @@ func (c *ClassController) GetExams(ctx *gin.Context) {
 		return
 	}
 
-	exams, err := c.service.ListExamsByClassPublicID(reqCtx, classID)
+	exams, err := c.service.ListExamsByClassPublicID(ctx.Request.Context(), classID)
 	if err != nil {
 		switch {
 		case errors.Is(err, gorm.ErrRecordNotFound):
@@ -53,8 +49,6 @@ func (c *ClassController) GetExams(ctx *gin.Context) {
 }
 
 func (c *ClassController) GetAssessments(ctx *gin.Context) {
-	reqCtx, cancel := context.WithTimeout(ctx.Request.Context(), 2*time.Second)
-	defer cancel()
 
 	publicID := ctx.Param("id")
 
@@ -64,7 +58,7 @@ func (c *ClassController) GetAssessments(ctx *gin.Context) {
 		return
 	}
 
-	assessments, err := c.service.ListAssessmentByPublicID(reqCtx, parseUUID)
+	assessments, err := c.service.ListAssessmentByPublicID(ctx.Request.Context(), parseUUID)
 	if err != nil {
 		switch {
 		case errors.Is(err, gorm.ErrRecordNotFound):
@@ -88,16 +82,13 @@ func (c *ClassController) CreateNewAssessment(ctx *gin.Context) {
 		return
 	}
 
-	reqCtx, cancel := context.WithTimeout(ctx.Request.Context(), 2*time.Second)
-	defer cancel()
-
 	parseUUID, err := utils.ParseUUIDString(publicID)
 	if err != nil {
 		helpers.InternalServerError(ctx, "internal server error")
 		return
 	}
 
-	assessment, err := c.service.CreateNewAssessment(reqCtx, parseUUID, &input)
+	assessment, err := c.service.CreateNewAssessment(ctx.Request.Context(), parseUUID, &input)
 	if err != nil {
 		switch {
 		case errors.Is(err, gorm.ErrRecordNotFound):
@@ -119,12 +110,9 @@ func (c *ClassController) LeaveClass(ctx *gin.Context) {
 		return
 	}
 
-	reqCtx, cancel := context.WithTimeout(ctx.Request.Context(), 2*time.Second)
-	defer cancel()
-
 	userID := ctx.GetUint64("user_id")
 
-	err := c.service.LeaveClass(reqCtx, classCode, userID)
+	err := c.service.LeaveClass(ctx.Request.Context(), classCode, userID)
 	if err != nil {
 		switch {
 		case errors.Is(err, domain.ErrNotJoinedClass):
@@ -149,12 +137,9 @@ func (c *ClassController) JoinClass(ctx *gin.Context) {
 		return
 	}
 
-	reqCtx, cancel := context.WithTimeout(ctx.Request.Context(), 2*time.Second)
-	defer cancel()
-
 	userID := ctx.GetUint64("user_id")
 
-	err := c.service.JoinClass(reqCtx, classCode, userID)
+	err := c.service.JoinClass(ctx.Request.Context(), classCode, userID)
 	if err != nil {
 		switch {
 		case errors.Is(err, domain.ErrAlreadyJoinedClass):
@@ -171,12 +156,10 @@ func (c *ClassController) JoinClass(ctx *gin.Context) {
 }
 
 func (c *ClassController) GetUserClasses(ctx *gin.Context) {
-	reqCtx, cancel := context.WithTimeout(ctx.Request.Context(), 2*time.Second)
-	defer cancel()
 
 	userID := ctx.GetUint64("user_id")
 
-	classes, err := c.service.GetUserClasses(reqCtx, userID)
+	classes, err := c.service.GetUserClasses(ctx.Request.Context(), userID)
 	if err != nil {
 		log.Println(err)
 		helpers.InternalServerError(ctx, "internal server error")
@@ -193,15 +176,12 @@ func (c *ClassController) Create(ctx *gin.Context) {
 		return
 	}
 
-	reqCtx, cancel := context.WithTimeout(ctx.Request.Context(), 2*time.Second)
-	defer cancel()
-
 	userID64 := ctx.GetUint64("user_id")
 	role := ctx.GetString("role")
 
 	userID := uint(userID64)
 
-	class, err := c.service.CreateNewClass(reqCtx, userID, role, input)
+	class, err := c.service.CreateNewClass(ctx.Request.Context(), userID, role, input)
 	if err != nil {
 		switch {
 		case errors.Is(err, domain.ErrForbidden):

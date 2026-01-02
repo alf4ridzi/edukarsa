@@ -1,13 +1,11 @@
 package controllers
 
 import (
-	"context"
 	"edukarsa-backend/internal/helpers"
 	"edukarsa-backend/internal/services"
 	"edukarsa-backend/internal/utils"
 	"errors"
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -25,8 +23,6 @@ func (c *AssessmentController) Create(ctx *gin.Context) {
 }
 
 func (c *AssessmentController) Delete(ctx *gin.Context) {
-	reqCtx, cancel := context.WithTimeout(ctx.Request.Context(), 2*time.Second)
-	defer cancel()
 
 	id := ctx.Param("id")
 
@@ -36,7 +32,7 @@ func (c *AssessmentController) Delete(ctx *gin.Context) {
 		return
 	}
 
-	err = c.service.Delete(reqCtx, parseID)
+	err = c.service.Delete(ctx.Request.Context(), parseID)
 	if err != nil {
 		switch {
 		case errors.Is(err, gorm.ErrRecordNotFound):

@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"context"
 	"edukarsa-backend/internal/domain"
 	"edukarsa-backend/internal/domain/models"
 	"edukarsa-backend/internal/helpers"
@@ -10,7 +9,6 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgconn"
@@ -34,10 +32,7 @@ func (c *UserController) UpdateUser(ctx *gin.Context) {
 
 	userID := ctx.GetUint64("user_id")
 
-	reqCtx, cancel := context.WithTimeout(ctx.Request.Context(), 2*time.Second)
-	defer cancel()
-
-	err := c.service.UpdateUserData(reqCtx, userID, input)
+	err := c.service.UpdateUserData(ctx.Request.Context(), userID, input)
 
 	var pgErr *pgconn.PgError
 
@@ -64,9 +59,6 @@ func (c *UserController) Refresh(ctx *gin.Context) {
 		return
 	}
 
-	reqCtx, cancel := context.WithTimeout(ctx.Request.Context(), 2*time.Second)
-	defer cancel()
-
 	claims, err := utils.ValidateRefreshToken(req.RefreshToken)
 	if err != nil {
 		helpers.InternalServerError(ctx, "token invalid/expired")
@@ -79,7 +71,7 @@ func (c *UserController) Refresh(ctx *gin.Context) {
 		return
 	}
 
-	user, err := c.service.FindByID(reqCtx, userID)
+	user, err := c.service.FindByID(ctx.Request.Context(), userID)
 	if err != nil {
 		switch {
 		case errors.Is(err, gorm.ErrRecordNotFound):
@@ -116,10 +108,7 @@ func (c *UserController) Login(ctx *gin.Context) {
 		return
 	}
 
-	reqCtx, cancel := context.WithTimeout(ctx.Request.Context(), 2*time.Second)
-	defer cancel()
-
-	user, err := c.service.Login(reqCtx, &reg)
+	user, err := c.service.Login(ctx.Request.Context(), &reg)
 
 	if err != nil {
 		switch {
@@ -166,10 +155,7 @@ func (c *UserController) Register(ctx *gin.Context) {
 		return
 	}
 
-	reqCtx, cancel := context.WithTimeout(ctx.Request.Context(), 2*time.Second)
-	defer cancel()
-
-	err := c.service.Register(reqCtx, &reg)
+	err := c.service.Register(ctx.Request.Context(), &reg)
 
 	if err != nil {
 		switch {
@@ -190,11 +176,7 @@ func (c *UserController) Register(ctx *gin.Context) {
 func (c *UserController) GetUser(ctx *gin.Context) {
 	userID := ctx.GetUint64("user_id")
 
-	reqCtx, cancel := context.WithTimeout(ctx.Request.Context(), 2*time.Second)
-
-	defer cancel()
-
-	user, err := c.service.FindByID(reqCtx, userID)
+	user, err := c.service.FindByID(ctx.Request.Context(), userID)
 	if err != nil {
 		helpers.InternalServerError(ctx, "internal server error")
 		return

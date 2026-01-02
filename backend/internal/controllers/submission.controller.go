@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"context"
 	"edukarsa-backend/internal/domain"
 	"edukarsa-backend/internal/domain/models"
 	"edukarsa-backend/internal/helpers"
@@ -13,7 +12,6 @@ import (
 	"net/http"
 	"path"
 	"path/filepath"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -34,9 +32,6 @@ func (c *SubmissionController) UpdateSubmission(ctx *gin.Context) {
 		return
 	}
 
-	reqCtx, cancel := context.WithTimeout(ctx.Request.Context(), 2*time.Second)
-	defer cancel()
-
 	submissionIDString := ctx.Param("id")
 	submissionID, err := utils.ParseUUIDString(submissionIDString)
 	if err != nil {
@@ -44,7 +39,7 @@ func (c *SubmissionController) UpdateSubmission(ctx *gin.Context) {
 		return
 	}
 
-	submission, err := c.service.EvaluateSubmission(reqCtx, submissionID, input)
+	submission, err := c.service.EvaluateSubmission(ctx.Request.Context(), submissionID, input)
 	if err != nil {
 		switch {
 		default:
@@ -57,8 +52,6 @@ func (c *SubmissionController) UpdateSubmission(ctx *gin.Context) {
 }
 
 func (c *SubmissionController) GetSubmission(ctx *gin.Context) {
-	reqCtx, cancel := context.WithTimeout(ctx.Request.Context(), 2*time.Second)
-	defer cancel()
 
 	assessmentIDString := ctx.Param("id")
 	assessmentID, err := utils.ParseUUIDString(assessmentIDString)
@@ -68,7 +61,7 @@ func (c *SubmissionController) GetSubmission(ctx *gin.Context) {
 		return
 	}
 
-	submission, err := c.service.GetAllSubmissionByAssessmentID(reqCtx, assessmentID)
+	submission, err := c.service.GetAllSubmissionByAssessmentID(ctx.Request.Context(), assessmentID)
 	if err != nil {
 		helpers.InternalServerError(ctx, "internal server error")
 		return
@@ -85,9 +78,6 @@ func (c *SubmissionController) Submission(ctx *gin.Context) {
 		return
 	}
 
-	reqCtx, cancel := context.WithTimeout(ctx.Request.Context(), 2*time.Second)
-	defer cancel()
-
 	assesmentID := ctx.Param("id")
 	userID := ctx.GetUint64("user_id")
 
@@ -97,7 +87,7 @@ func (c *SubmissionController) Submission(ctx *gin.Context) {
 	filePath := filepath.Join("assets", "images", "submissions", fileName)
 	publicURL := "/" + path.Join("assets", "images", "submissions", fileName)
 
-	submission, err := c.service.SubmitSubmission(reqCtx, assesmentID, uint(userID), publicURL, input)
+	submission, err := c.service.SubmitSubmission(ctx.Request.Context(), assesmentID, uint(userID), publicURL, input)
 	if err != nil {
 		switch {
 		case errors.Is(err, domain.ErrFileSizeTooBig):

@@ -1,11 +1,9 @@
 package controllers
 
 import (
-	"context"
 	"edukarsa-backend/internal/helpers"
 	"edukarsa-backend/internal/services"
 	"log"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -26,10 +24,7 @@ func (c *StudentClassessController) GetExams(ctx *gin.Context) {
 		return
 	}
 
-	reqCtx, cancel := context.WithTimeout(ctx.Request.Context(), 2*time.Second)
-	defer cancel()
-
-	exams, err := c.studentClassessService.GetExams(reqCtx, classID)
+	exams, err := c.studentClassessService.GetExams(ctx.Request.Context(), classID)
 	if err != nil {
 		switch {
 		default:

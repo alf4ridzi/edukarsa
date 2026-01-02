@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"context"
 	"edukarsa-backend/internal/domain"
 	"edukarsa-backend/internal/domain/dto"
 	"edukarsa-backend/internal/helpers"
@@ -10,7 +9,6 @@ import (
 	"errors"
 	"log"
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -38,10 +36,7 @@ func (c *ExamController) UpdateExam(ctx *gin.Context) {
 		return
 	}
 
-	reqCtx, cancel := context.WithTimeout(ctx.Request.Context(), 2*time.Second)
-	defer cancel()
-
-	exam, err := c.service.UpdateExam(reqCtx, examID, input)
+	exam, err := c.service.UpdateExam(ctx.Request.Context(), examID, input)
 	if err != nil {
 		switch {
 		default:
@@ -61,10 +56,7 @@ func (c *ExamController) GetQuestions(ctx *gin.Context) {
 		return
 	}
 
-	reqCtx, cancel := context.WithTimeout(ctx.Request.Context(), 2*time.Second)
-	defer cancel()
-
-	questions, err := c.service.ListExamQuestions(reqCtx, examID)
+	questions, err := c.service.ListExamQuestions(ctx.Request.Context(), examID)
 	if err != nil {
 		switch {
 		case errors.Is(err, gorm.ErrRecordNotFound):
@@ -97,10 +89,7 @@ func (c *ExamController) CreateQuestions(ctx *gin.Context) {
 		return
 	}
 
-	reqCtx, cancel := context.WithTimeout(ctx.Request.Context(), 2*time.Second)
-	defer cancel()
-
-	question, err := c.service.CreateQuestions(reqCtx, examID, input)
+	question, err := c.service.CreateQuestions(ctx.Request.Context(), examID, input)
 	if err != nil {
 		switch {
 		case errors.Is(err, gorm.ErrRecordNotFound):
@@ -123,12 +112,9 @@ func (c *ExamController) Create(ctx *gin.Context) {
 		return
 	}
 
-	reqCtx, cancel := context.WithTimeout(ctx.Request.Context(), 2*time.Second)
-	defer cancel()
-
 	userID := ctx.GetUint64("user_id")
 
-	exam, err := c.service.CreateNewExam(reqCtx, uint(userID), input)
+	exam, err := c.service.CreateNewExam(ctx.Request.Context(), uint(userID), input)
 	if err != nil {
 		switch {
 		case errors.Is(err, gorm.ErrRecordNotFound):
