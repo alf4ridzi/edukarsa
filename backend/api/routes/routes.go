@@ -18,6 +18,7 @@ func SetupRoute(db *gorm.DB, enforcer *casbin.Enforcer) {
 	route := gin.Default()
 
 	route.Use(middlewares.TimeoutMiddleware(config.AppConfig.ContextRequestTimeout))
+	route.Use(middlewares.RateLimiter())
 
 	NewStaticRoute(route)
 
