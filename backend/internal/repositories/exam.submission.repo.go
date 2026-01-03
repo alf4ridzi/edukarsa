@@ -11,6 +11,8 @@ import (
 type ExamSubmissionRepo interface {
 	Create(ctx context.Context, submission *models.ExamSubmission) error
 	ExistByExamIDAndUserID(ctx context.Context, examID uuid.UUID, userID uint) (bool, error)
+	FindByExamIDAndUserID(ctx context.Context, examID uuid.UUID, userID uint) (*models.ExamSubmission, error)
+	Update(ctx context.Context, submission *models.ExamSubmission) error
 }
 
 type examSubmissionRepoImpl struct {
@@ -19,6 +21,10 @@ type examSubmissionRepoImpl struct {
 
 func NewExamSubmissionRepo(db *gorm.DB) ExamSubmissionRepo {
 	return &examSubmissionRepoImpl{DB: db}
+}
+
+func (r *examSubmissionRepoImpl) Update(ctx context.Context, submission *models.ExamSubmission) error {
+	return r.DB.WithContext(ctx).Updates(submission).Error
 }
 
 func (r *examSubmissionRepoImpl) ExistByExamIDAndUserID(ctx context.Context, examID uuid.UUID, userID uint) (bool, error) {
@@ -31,6 +37,15 @@ func (r *examSubmissionRepoImpl) ExistByExamIDAndUserID(ctx context.Context, exa
 	return count > 0, err
 }
 
+func (r *examSubmissionRepoImpl) FindByExamIDAndUserID(ctx context.Context, examID uuid.UUID, userID uint) (*models.ExamSubmission, error) {
+	var submission models.ExamSubmission
+	err := r.DB.WithContext(ctx).
+		First(&submission, "exam_id = ? AND user_id = ?", examID, userID).Error
+
+	return &submission, err
+}
+
 func (r *examSubmissionRepoImpl) Create(ctx context.Context, submission *models.ExamSubmission) error {
-	return r.DB.WithContext(ctx).Create(submission).Error
+	return r.DB.WithContext(ctx).
+		Create(submission).Error
 }

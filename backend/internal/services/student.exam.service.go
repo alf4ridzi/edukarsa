@@ -8,6 +8,7 @@ import (
 	"edukarsa-backend/internal/helpers"
 	"edukarsa-backend/internal/mapper"
 	"edukarsa-backend/internal/repositories"
+	"errors"
 	"time"
 
 	"github.com/google/uuid"
@@ -88,18 +89,31 @@ func (s *studentExamServiceImpl) AnswerQuestion(
 		return err
 	}
 
+	submission, err := s.examSubmissionRepo.FindByExamIDAndUserID(ctx, exam.ID, userID)
+	if err != nil {
+		return err
+	}
+
+	if submission.Status != "ongoing" {
+		switch submission.Status {
+		case "submitted":
+			return domain.ErrExamAlreadySubmitted
+		case "expired":
+			return domain.ErrExamExpired
+		}
+	}
+
 	err = helpers.CanStudentStartExam(exam)
 	if err != nil {
-		return err
-	}
+		if errors.Is(err, domain.ErrExamAlreadyFinished) {
+			submission.Status = "expired"
+			err = s.examSubmissionRepo.Update(ctx, submission)
+			if err != nil {
+				return err
+			}
+		}
 
-	started, err := s.examSubmissionRepo.ExistByExamIDAndUserID(ctx, exam.ID, userID)
-	if err != nil {
 		return err
-	}
-
-	if !started {
-		return domain.ErrUserExamNotStarted
 	}
 
 	question, err := s.questionRepo.FindQuestionByID(ctx, questionID)
@@ -125,22 +139,24 @@ func (s *studentExamServiceImpl) AnswerQuestion(
 		return err
 	}
 
-	if existing != nil && existing.AnswerID == input.OptionID {
-		return domain.ErrSameAnswerSubmitted
-	}
-
-	if existing == nil {
-		answer := &models.ExamUserAnswer{
-			ExamID:         exam.ID,
-			UserID:         userID,
-			ExamQuestionID: question.ID,
-			AnswerID:       input.OptionID,
+	if existing != nil {
+		if existing.AnswerID == input.OptionID {
+			return domain.ErrSameAnswerSubmitted
 		}
 
-		return s.answerRepo.Create(ctx, answer)
+		return s.answerRepo.UpdateAnswer(ctx, existing.ID, input.OptionID)
+
 	}
 
-	return s.answerRepo.UpdateAnswer(ctx, existing.ID, input.OptionID)
+	answer := &models.ExamUserAnswer{
+		ExamID:         exam.ID,
+		UserID:         userID,
+		ExamQuestionID: question.ID,
+		AnswerID:       input.OptionID,
+	}
+
+	return s.answerRepo.Create(ctx, answer)
+
 }
 
 func (s *studentExamServiceImpl) ListQuestions(ctx context.Context, examID uuid.UUID) ([]dto.ExamQuestionStudentResponse, error) {

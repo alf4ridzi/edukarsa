@@ -22,4 +22,6 @@ var (
 	ErrSameAnswerSubmitted       = errors.New("opsi tidak boleh sama")
 	ErrAlreadyStartExam          = errors.New("sudah memulai ujian")
 	ErrUserExamNotStarted        = errors.New("ujian belum dimulai oleh user")
+	ErrExamAlreadySubmitted      = errors.New("ujian sudah disubmit")
+	ErrExamExpired               = errors.New("ujian expired")
 )

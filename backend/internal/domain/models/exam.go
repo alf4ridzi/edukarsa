@@ -1,6 +1,7 @@
 package models
 
 import (
+	"edukarsa-backend/internal/domain"
 	"time"
 
 	"github.com/google/uuid"
@@ -94,7 +95,7 @@ type ExamSubmission struct {
 	StartAt     time.Time
 	SubmittedAt *time.Time
 
-	Status string `gorm:"not null;default:'ongoing'"` // submitted, ongoing, expired
+	Status domain.SubmissionStatus `gorm:"not null;default:'ongoing'"` // submitted, ongoing, expired
 
 	CreatedAt time.Time
 	UpdatedAt time.Time
