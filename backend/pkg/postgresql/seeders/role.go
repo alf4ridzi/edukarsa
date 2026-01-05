@@ -4,6 +4,9 @@ import "edukarsa-backend/internal/domain/models"
 
 var roles = []models.Role{
 	{
+		Name: "admin",
+	},
+	{
 		Name: "teacher",
 	},
 	{

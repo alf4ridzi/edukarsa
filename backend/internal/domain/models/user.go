@@ -29,7 +29,7 @@ type User struct {
 
 func (u *User) BeforeCreate(tx *gorm.DB) error {
 	if u.RoleID == 0 {
-		u.RoleID = 2
+		u.RoleID = 3
 	}
 
 	hashPass, err := utils.HashPasswordBcrypt(u.Password)
