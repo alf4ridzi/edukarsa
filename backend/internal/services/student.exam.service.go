@@ -22,6 +22,7 @@ type StudentExamService interface {
 		input dto.StudentAnswerRequest,
 		userID uint) error
 	StartExam(ctx context.Context, examID uuid.UUID, userID uint) error
+	SubmitExam(ctx context.Context, examID uuid.UUID, userID uint) error
 }
 
 type studentExamServiceImpl struct {
@@ -45,6 +46,47 @@ func NewStudentExamService(studentExamRepo repositories.StudentExamRepo,
 		questionRepo:       questionRepo,
 		answerRepo:         answerRepo,
 		examSubmissionRepo: examSubmissionRepo}
+}
+
+func (s *studentExamServiceImpl) SubmitExam(ctx context.Context, examID uuid.UUID, userID uint) error {
+	exam, err := s.examRepo.FindExamByID(ctx, examID)
+	if err != nil {
+		return err
+	}
+
+	submission, err := s.examSubmissionRepo.FindByExamIDAndUserID(ctx, exam.ID, userID)
+	if err != nil {
+		return err
+	}
+
+	if submission == nil {
+		return domain.ErrSubmissionNotStarted
+	}
+
+	switch submission.Status {
+	case domain.SubmissionSubmitted:
+		return domain.ErrExamAlreadySubmitted
+	case domain.SubmissionExpired:
+		return domain.ErrExamExpired
+	case domain.SubmissionOngoing:
+	default:
+		return domain.ErrInvalidSubmissionStatus
+	}
+
+	if err := helpers.CanStudentStartExam(exam); err != nil {
+		if errors.Is(err, domain.ErrExamAlreadyFinished) {
+			submission.Status = domain.SubmissionExpired
+			_ = s.examSubmissionRepo.Update(ctx, submission)
+		}
+		return err
+	}
+
+	now := time.Now().UTC()
+
+	submission.SubmittedAt = &now
+	submission.Status = domain.SubmissionSubmitted
+
+	return s.examSubmissionRepo.Update(ctx, submission)
 }
 
 func (s *studentExamServiceImpl) StartExam(ctx context.Context, examID uuid.UUID, userID uint) error {
@@ -94,19 +136,20 @@ func (s *studentExamServiceImpl) AnswerQuestion(
 		return err
 	}
 
-	if submission.Status != "ongoing" {
+	if submission.Status != domain.SubmissionOngoing {
 		switch submission.Status {
-		case "submitted":
+		case domain.SubmissionSubmitted:
 			return domain.ErrExamAlreadySubmitted
-		case "expired":
+		case domain.SubmissionExpired:
 			return domain.ErrExamExpired
+		default:
+			return domain.ErrInvalidSubmissionStatus
 		}
 	}
 
-	err = helpers.CanStudentStartExam(exam)
-	if err != nil {
+	if err := helpers.CanStudentStartExam(exam); err != nil {
 		if errors.Is(err, domain.ErrExamAlreadyFinished) {
-			submission.Status = "expired"
+			submission.Status = domain.SubmissionExpired
 			err = s.examSubmissionRepo.Update(ctx, submission)
 			if err != nil {
 				return err

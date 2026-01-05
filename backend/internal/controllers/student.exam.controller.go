@@ -23,6 +23,42 @@ func NewStudentExamController(studentExamService services.StudentExamService) *S
 	return &StudentExamController{studentExamService: studentExamService}
 }
 
+func (c *StudentExamController) SubmitExam(ctx *gin.Context) {
+	examID, err := uuid.Parse(ctx.Param("exam_id"))
+	if err != nil {
+		helpers.BadRequest(ctx, "id ujian tidak valid")
+		return
+	}
+
+	userID := uint(ctx.GetUint64("user_id"))
+
+	err = c.studentExamService.SubmitExam(
+		ctx.Request.Context(),
+		examID,
+		userID)
+
+	if err != nil {
+		switch {
+		case errors.Is(err, domain.ErrExamAlreadyFinished):
+			helpers.ResponseJSON(ctx, http.StatusForbidden, false, err.Error(), nil)
+		case errors.Is(err, domain.ErrExamAlreadySubmitted):
+			helpers.ResponseJSON(ctx, http.StatusForbidden, false, err.Error(), nil)
+		case errors.Is(err, domain.ErrExamExpired):
+			helpers.ResponseJSON(ctx, http.StatusForbidden, false, err.Error(), nil)
+		case errors.Is(err, domain.ErrExamNotAccessible):
+			helpers.ResponseJSON(ctx, http.StatusForbidden, false, err.Error(), nil)
+		case errors.Is(err, domain.ErrExamNotStarted):
+			helpers.ResponseJSON(ctx, http.StatusForbidden, false, err.Error(), nil)
+		default:
+			log.Println(err)
+			helpers.InternalServerError(ctx, "internal server error")
+		}
+		return
+	}
+
+	helpers.OK(ctx, "berhasil submit ujian", nil)
+}
+
 func (c *StudentExamController) StartExam(ctx *gin.Context) {
 	examID, err := uuid.Parse(ctx.Param("exam_id"))
 	if err != nil {
