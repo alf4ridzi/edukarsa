@@ -15,8 +15,9 @@ var roles = []models.Role{
 }
 
 func (s Seed) RoleSeed() error {
-	for _, role := range roles {
-		err := s.DB.Create(&role).Error
+	for _, r := range roles {
+		role := r
+		err := s.DB.FirstOrCreate(&role).Error
 		if err != nil {
 			return err
 		}

@@ -1,6 +1,8 @@
 package seeders
 
-import "edukarsa-backend/internal/domain/models"
+import (
+	"edukarsa-backend/internal/domain/models"
+)
 
 // DO NOT USE IT FOR PRODUCTION!!!
 var users = []models.User{
@@ -42,7 +44,8 @@ func (s Seed) UserSeed() error {
 	// 		return err
 	// 	}
 
-	for _, user := range users {
+	for _, u := range users {
+		user := u
 		err := s.DB.FirstOrCreate(&user).Error
 		if err != nil {
 			return err
