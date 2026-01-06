@@ -132,6 +132,101 @@ air
 
 ---
 
+## Development
+### Basic Commmand
+#### Migration Database
+```
+go run cmd/main.go --migrate
+```
+#### Seeder Data
+```
+go run cmd/main.go --seed
+```
+#### Wipe all database (on migration)
+```
+go run cmd/main.go --wipe
+```
+
+## Migration
+Create model for database first
+
+Example 
+
+**models/user.go**
+```
+type User struct {
+	gorm.Model 
+	Name string
+	Username string  `gorm:"uniqueIndex:idx_username"`
+	Password string
+}
+```
+
+Add to migration list
+
+**pkg/postgresql/postgresql.go**
+
+```
+var Migration = []any{
+	&models.User{},
+	// add more	
+}
+```
+## Seeders
+### Template
+**pkg/postgresql/seeders/[name].go**
+```
+func (s Seed) TemplateSeed() error {
+    // Your code here
+	return nil
+}
+```
+And call seeder function
+
+**pkg/postgresql/seeders/seeders.go**
+```
+func (s Seed) Run() error {
+	if err := s.TemplateSeed(); err != nil {
+		return err
+	}
+
+    // add more
+	return nil
+}
+```
+#### Example 
+**pkg/postgresql/seeders/[name].go**
+```
+func (s Seed) UserSeed() error {
+	for range 100 {
+		user := models.User{
+			RoleID:   1,
+			Name:     faker.Name(),
+			Email:    faker.Email(),
+			Username: faker.Username(),
+			Password: "user12345",
+		}
+
+		err := s.DB.Create(&user).Error
+		if err != nil {
+			return err
+		}
+
+        return nil
+    }
+}
+```
+**pkg/postgresql/seeders/seeders.go**
+```
+func (s Seed) Run() error {
+	if err := s.UserSeed(); err != nil {
+		return err
+	}
+	
+	// add more ...
+	return nil
+}
+```
 ## Lisensi
 
 Project ini dilisensikan di bawah [MIT License](LICENSE)
