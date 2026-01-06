@@ -17,7 +17,7 @@ var roles = []models.Role{
 func (s Seed) RoleSeed() error {
 	for _, r := range roles {
 		role := r
-		err := s.DB.Where("name = ?", role.Name).First(&role).Error
+		err := s.DB.Where("name = ?", role.Name).FirstOrCreate(&role).Error
 		if err != nil {
 			return err
 		}
