@@ -10,15 +10,16 @@ var (
 	// error common
 	ErrForbidden = errors.New("forbidden")
 	// error class
-	ErrAlreadyJoinedClass  = errors.New("sudah bergabung")
-	ErrNotJoinedClass      = errors.New("belum bergabung")
-	ErrCreatorCantLeave    = errors.New("kreator tidak boleh keluar")
-	ErrInvalidExtension    = errors.New("extensi file tidak disupport")
-	ErrFileSizeTooBig      = errors.New("ukuran file terlalu besar")
-	ErrMinimumOption       = errors.New("minimal pilihan adalah 2")
-	ErrInvalidCorrectIndex = errors.New("jawaban opsi tidak benar")
+	ErrAlreadyJoinedClass = errors.New("sudah bergabung")
+	ErrNotJoinedClass     = errors.New("belum bergabung")
+	ErrCreatorCantLeave   = errors.New("kreator tidak boleh keluar")
+	// error submission
+	ErrInvalidExtension = errors.New("extensi file tidak disupport")
+	ErrFileSizeTooBig   = errors.New("ukuran file terlalu besar")
+	ErrMinimumOption    = errors.New("minimal pilihan adalah 2")
 	// error exam
 	ErrExamNotStarted       = errors.New("ujian belum dimulai")
+	ErrInvalidCorrectIndex  = errors.New("jawaban opsi tidak benar")
 	ErrExamAlreadyFinished  = errors.New("ujian sudah selesai")
 	ErrExamNotAccessible    = errors.New("ujian belum dapat diakses")
 	ErrAlreadyStartExam     = errors.New("sudah memulai ujian")

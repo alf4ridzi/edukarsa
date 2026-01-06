@@ -17,6 +17,9 @@ var Migration = []any{
 	&models.Class{},
 	&models.ClassUser{},
 
+	&models.Assessment{},
+	&models.AssessmentSubmission{},
+
 	&models.Exam{},
 	&models.ExamQuestion{},
 	&models.ExamOption{},
