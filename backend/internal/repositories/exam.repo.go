@@ -11,9 +11,9 @@ import (
 type ExamRepo interface {
 	Create(ctx context.Context, exam *models.Exam) error
 	FindExamByID(ctx context.Context, id uuid.UUID) (*models.Exam, error)
-	CreateOption(ctx context.Context, tx *gorm.DB, option *models.ExamOption) error
-	CreateQuestion(ctx context.Context, tx *gorm.DB, question *models.ExamQuestion) error
-	UpdateQuestion(ctx context.Context, tx *gorm.DB, question *models.ExamQuestion) error
+	CreateOption(ctx context.Context, option *models.ExamOption) error
+	CreateQuestion(ctx context.Context, question *models.ExamQuestion) error
+	UpdateQuestion(ctx context.Context, question *models.ExamQuestion) error
 	ListQuestionsByExamID(ctx context.Context, id uuid.UUID) ([]models.ExamQuestion, error)
 	Update(ctx context.Context, exam *models.Exam) error
 }
@@ -42,16 +42,16 @@ func (r *examRepoImpl) FindExamByID(ctx context.Context, id uuid.UUID) (*models.
 	return &exam, err
 }
 
-func (r *examRepoImpl) CreateOption(ctx context.Context, tx *gorm.DB, option *models.ExamOption) error {
-	return tx.WithContext(ctx).Create(option).Error
+func (r *examRepoImpl) CreateOption(ctx context.Context, option *models.ExamOption) error {
+	return r.DB.WithContext(ctx).Create(option).Error
 }
 
-func (r *examRepoImpl) CreateQuestion(ctx context.Context, tx *gorm.DB, question *models.ExamQuestion) error {
-	return tx.WithContext(ctx).Create(question).Error
+func (r *examRepoImpl) CreateQuestion(ctx context.Context, question *models.ExamQuestion) error {
+	return r.DB.WithContext(ctx).Create(question).Error
 }
 
-func (r *examRepoImpl) UpdateQuestion(ctx context.Context, tx *gorm.DB, question *models.ExamQuestion) error {
-	return tx.WithContext(ctx).Updates(question).Error
+func (r *examRepoImpl) UpdateQuestion(ctx context.Context, question *models.ExamQuestion) error {
+	return r.DB.WithContext(ctx).Updates(question).Error
 }
 
 func (r *examRepoImpl) Create(ctx context.Context, exam *models.Exam) error {

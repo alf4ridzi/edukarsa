@@ -104,13 +104,15 @@ func (s *examServiceImpl) CreateQuestions(ctx context.Context, examID uuid.UUID,
 
 	err = s.DB.Transaction(func(tx *gorm.DB) error {
 		for _, inputQuestion := range input {
+			examRepo := repositories.NewExamRepo(tx)
+
 			question := models.ExamQuestion{
 				ExamID:      exam.ID,
 				Question:    inputQuestion.Question,
 				Explanation: inputQuestion.Explanation,
 			}
 
-			if err := s.repo.CreateQuestion(ctx, tx, &question); err != nil {
+			if err := examRepo.CreateQuestion(ctx, &question); err != nil {
 				return err
 			}
 
@@ -122,13 +124,13 @@ func (s *examServiceImpl) CreateQuestions(ctx context.Context, examID uuid.UUID,
 					Option:         opt,
 				}
 
-				if err := s.repo.CreateOption(ctx, tx, &options[i]); err != nil {
+				if err := examRepo.CreateOption(ctx, &options[i]); err != nil {
 					return err
 				}
 			}
 
 			question.AnswerID = &options[inputQuestion.CorrectIndex].ID
-			if err := s.repo.UpdateQuestion(ctx, tx, &question); err != nil {
+			if err := examRepo.UpdateQuestion(ctx, &question); err != nil {
 				return err
 			}
 

@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 type StudentExamService interface {
@@ -26,6 +27,7 @@ type StudentExamService interface {
 }
 
 type studentExamServiceImpl struct {
+	DB                 *gorm.DB
 	studentExamRepo    repositories.StudentExamRepo
 	examRepo           repositories.ExamRepo
 	optionRepo         repositories.OptionRepo
@@ -34,13 +36,17 @@ type studentExamServiceImpl struct {
 	examSubmissionRepo repositories.ExamSubmissionRepo
 }
 
-func NewStudentExamService(studentExamRepo repositories.StudentExamRepo,
+func NewStudentExamService(
+	DB *gorm.DB,
+	studentExamRepo repositories.StudentExamRepo,
 	examRepo repositories.ExamRepo,
 	optionRepo repositories.OptionRepo,
 	questionRepo repositories.QuestionRepo,
 	answerRepo repositories.AnswerRepo,
 	examSubmissionRepo repositories.ExamSubmissionRepo) StudentExamService {
-	return &studentExamServiceImpl{studentExamRepo: studentExamRepo,
+	return &studentExamServiceImpl{
+		DB:                 DB,
+		studentExamRepo:    studentExamRepo,
 		examRepo:           examRepo,
 		optionRepo:         optionRepo,
 		questionRepo:       questionRepo,
@@ -126,80 +132,87 @@ func (s *studentExamServiceImpl) AnswerQuestion(
 	input dto.StudentAnswerRequest,
 	userID uint) error {
 
-	exam, err := s.examRepo.FindExamByID(ctx, examID)
-	if err != nil {
-		return err
-	}
+	return s.DB.Transaction(func(tx *gorm.DB) error {
+		examRepo := repositories.NewExamRepo(tx)
+		examSubmissionRepo := repositories.NewExamSubmissionRepo(tx)
+		questionRepo := repositories.NewQuestionRepo(tx)
+		optionRepo := repositories.NewOptionRepo(tx)
+		answerRepo := repositories.NewAnswerRepo(tx)
 
-	submission, err := s.examSubmissionRepo.FindByExamIDAndUserID(ctx, exam.ID, userID)
-	if err != nil {
-		return err
-	}
-
-	if submission.Status != domain.SubmissionOngoing {
-		switch submission.Status {
-		case domain.SubmissionSubmitted:
-			return domain.ErrExamAlreadySubmitted
-		case domain.SubmissionExpired:
-			return domain.ErrExamExpired
-		default:
-			return domain.ErrInvalidSubmissionStatus
+		exam, err := examRepo.FindExamByID(ctx, examID)
+		if err != nil {
+			return err
 		}
-	}
 
-	if err := helpers.CanStudentStartExam(exam); err != nil {
-		if errors.Is(err, domain.ErrExamAlreadyFinished) {
-			submission.Status = domain.SubmissionExpired
-			err = s.examSubmissionRepo.Update(ctx, submission)
-			if err != nil {
-				return err
+		submission, err := examSubmissionRepo.FindByExamIDAndUserID(ctx, exam.ID, userID)
+		if err != nil {
+			return err
+		}
+
+		if submission.Status != domain.SubmissionOngoing {
+			switch submission.Status {
+			case domain.SubmissionSubmitted:
+				return domain.ErrExamAlreadySubmitted
+			case domain.SubmissionExpired:
+				return domain.ErrExamExpired
+			default:
+				return domain.ErrInvalidSubmissionStatus
 			}
 		}
 
-		return err
-	}
+		if err := helpers.CanStudentStartExam(exam); err != nil {
+			if errors.Is(err, domain.ErrExamAlreadyFinished) {
+				submission.Status = domain.SubmissionExpired
+				err = examSubmissionRepo.Update(ctx, submission)
+				if err != nil {
+					return err
+				}
+			}
 
-	question, err := s.questionRepo.FindQuestionByID(ctx, questionID)
-	if err != nil {
-		return err
-	}
-
-	if question.ExamID != exam.ID {
-		return domain.ErrQuestionNotBelongToExam
-	}
-
-	option, err := s.optionRepo.FindOptionByID(ctx, input.OptionID)
-	if err != nil {
-		return err
-	}
-
-	if option.ExamQuestionID != question.ID {
-		return domain.ErrOptionNotBelongToQuestion
-	}
-
-	existing, err := s.answerRepo.FindByUserAndQuestion(ctx, exam.ID, question.ID, userID)
-	if err != nil {
-		return err
-	}
-
-	if existing != nil {
-		if existing.AnswerID == input.OptionID {
-			return domain.ErrSameAnswerSubmitted
+			return err
 		}
 
-		return s.answerRepo.UpdateAnswer(ctx, existing.ID, input.OptionID)
+		question, err := questionRepo.FindQuestionByID(ctx, questionID)
+		if err != nil {
+			return err
+		}
 
-	}
+		if question.ExamID != exam.ID {
+			return domain.ErrQuestionNotBelongToExam
+		}
 
-	answer := &models.ExamUserAnswer{
-		ExamID:         exam.ID,
-		UserID:         userID,
-		ExamQuestionID: question.ID,
-		AnswerID:       input.OptionID,
-	}
+		option, err := optionRepo.FindOptionByID(ctx, input.OptionID)
+		if err != nil {
+			return err
+		}
 
-	return s.answerRepo.Create(ctx, answer)
+		if option.ExamQuestionID != question.ID {
+			return domain.ErrOptionNotBelongToQuestion
+		}
 
+		existing, err := answerRepo.FindByUserAndQuestion(ctx, exam.ID, question.ID, userID)
+		if err != nil {
+			return err
+		}
+
+		if existing != nil {
+			if existing.AnswerID == input.OptionID {
+				return domain.ErrSameAnswerSubmitted
+			}
+
+			return answerRepo.UpdateAnswer(ctx, existing.ID, input.OptionID)
+
+		}
+
+		answer := &models.ExamUserAnswer{
+			ExamID:         exam.ID,
+			UserID:         userID,
+			ExamQuestionID: question.ID,
+			AnswerID:       input.OptionID,
+		}
+
+		return answerRepo.Create(ctx, answer)
+	})
 }
 
 func (s *studentExamServiceImpl) ListQuestions(ctx context.Context, examID uuid.UUID) ([]dto.ExamQuestionStudentResponse, error) {
