@@ -70,17 +70,16 @@ type ExamOption struct {
 type ExamUserAnswer struct {
 	ID uint `gorm:"primaryKey"`
 
-	ExamID uuid.UUID `gorm:"type:uuid;index;not null"`
-	Exam   Exam      `gorm:"foreignKey:ExamID"`
+	ExamID         uuid.UUID `gorm:"type:uuid;not null;uniqueIndex:ux_exam_user_question"`
+	UserID         uint      `gorm:"not null;uniqueIndex:ux_exam_user_question"`
+	ExamQuestionID uint      `gorm:"not null;uniqueIndex:ux_exam_user_question"`
 
-	UserID uint `gorm:"index;not null"`
-	User   User `gorm:"foreignKey:UserID"`
+	AnswerID uint `gorm:"not null"`
 
-	ExamQuestionID uint         `gorm:"index;not null"`
-	ExamQuestion   ExamQuestion `gorm:"foreignKey:ExamQuestionID"`
-
-	AnswerID uint
-	Answer   ExamOption `gorm:"foreignKey:AnswerID"`
+	Exam         Exam         `gorm:"foreignKey:ExamID;constraint:OnDelete:RESTRICT"`
+	User         User         `gorm:"foreignKey:UserID;constraint:OnDelete:RESTRICT"`
+	ExamQuestion ExamQuestion `gorm:"foreignKey:ExamQuestionID;constraint:OnDelete:CASCADE"`
+	Answer       ExamOption   `gorm:"foreignKey:AnswerID;constraint:OnDelete:RESTRICT"`
 
 	CreatedAt time.Time
 	UpdatedAt time.Time
