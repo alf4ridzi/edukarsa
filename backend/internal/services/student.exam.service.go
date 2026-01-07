@@ -79,20 +79,26 @@ func (s *studentExamServiceImpl) SubmitExam(ctx context.Context, examID uuid.UUI
 		return domain.ErrInvalidSubmissionStatus
 	}
 
-	if err := helpers.CanStudentStartExam(exam); err != nil {
-		if errors.Is(err, domain.ErrExamAlreadyFinished) {
-			submission.Status = domain.SubmissionExpired
-			_ = s.examSubmissionRepo.Update(ctx, submission)
+	return s.DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		examSubmissionRepo := repositories.NewExamSubmissionRepo(tx)
+
+		if err := helpers.CanStudentStartExam(exam); err != nil {
+			if errors.Is(err, domain.ErrExamAlreadyFinished) {
+				submission.Status = domain.SubmissionExpired
+				if err := examSubmissionRepo.Update(ctx, submission); err != nil {
+					return err
+				}
+			}
+			return err
 		}
-		return err
-	}
 
-	now := time.Now().UTC()
+		now := time.Now().UTC()
 
-	submission.SubmittedAt = &now
-	submission.Status = domain.SubmissionSubmitted
+		submission.SubmittedAt = &now
+		submission.Status = domain.SubmissionSubmitted
 
-	return s.examSubmissionRepo.Update(ctx, submission)
+		return examSubmissionRepo.Update(ctx, submission)
+	})
 }
 
 func (s *studentExamServiceImpl) StartExam(ctx context.Context, examID uuid.UUID, userID uint) error {
@@ -132,7 +138,7 @@ func (s *studentExamServiceImpl) AnswerQuestion(
 	input dto.StudentAnswerRequest,
 	userID uint) error {
 
-	return s.DB.Transaction(func(tx *gorm.DB) error {
+	return s.DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		examRepo := repositories.NewExamRepo(tx)
 		examSubmissionRepo := repositories.NewExamSubmissionRepo(tx)
 		questionRepo := repositories.NewQuestionRepo(tx)
