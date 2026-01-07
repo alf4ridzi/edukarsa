@@ -13,6 +13,7 @@ type AnswerRepo interface {
 	FindByUserAndQuestion(ctx context.Context, examID uuid.UUID, questionID uint, userID uint) (*models.ExamUserAnswer, error)
 	Create(ctx context.Context, answer *models.ExamUserAnswer) error
 	UpdateAnswer(ctx context.Context, id uint, answerID uint) error
+	FindByExamAndUser(ctx context.Context, examID uuid.UUID, userID uint) ([]models.ExamUserAnswer, error)
 }
 
 type answerRepoImpl struct {
@@ -21,6 +22,14 @@ type answerRepoImpl struct {
 
 func NewAnswerRepo(db *gorm.DB) AnswerRepo {
 	return &answerRepoImpl{DB: db}
+}
+
+func (r *answerRepoImpl) FindByExamAndUser(ctx context.Context, examID uuid.UUID, userID uint) ([]models.ExamUserAnswer, error) {
+	var answers []models.ExamUserAnswer
+	err := r.DB.WithContext(ctx).
+		Find(&answers, "exam_id = ? AND user_id = ?", examID, userID).
+		Error
+	return answers, err
 }
 
 func (r *answerRepoImpl) UpdateAnswer(ctx context.Context, id uint, answerID uint) error {

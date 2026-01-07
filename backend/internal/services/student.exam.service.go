@@ -87,8 +87,21 @@ func (s *studentExamServiceImpl) SubmitExam(ctx context.Context, examID uuid.UUI
 		return domain.ErrExamDurationExceeded
 	}
 
+	questions, err := s.questionRepo.FindQuestionsByExamID(ctx, exam.ID)
+	if err != nil {
+		return err
+	}
+
+	answers, err := s.answerRepo.FindByExamAndUser(ctx, exam.ID, userID)
+	if err != nil {
+		return err
+	}
+
+	result := helpers.CalculateScore(questions, answers)
+
 	return s.DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		examSubmissionRepo := repositories.NewExamSubmissionRepo(tx)
+		examScoreRepo := repositories.NewExamScoreRepo(tx)
 
 		if err := helpers.CanStudentStartExam(exam); err != nil {
 			if errors.Is(err, domain.ErrExamAlreadyFinished) {
@@ -105,7 +118,27 @@ func (s *studentExamServiceImpl) SubmitExam(ctx context.Context, examID uuid.UUI
 		submission.SubmittedAt = &now
 		submission.Status = domain.SubmissionSubmitted
 
-		return examSubmissionRepo.Update(ctx, submission)
+		err = examSubmissionRepo.Update(ctx, submission)
+		if err != nil {
+			return err
+		}
+
+		score := &models.ExamScore{
+			ExamID:     exam.ID,
+			UserID:     userID,
+			Correct:    result.Correct,
+			Wrong:      result.Wrong,
+			UnAnswered: result.UnAnswered,
+			Score:      result.Score,
+			FinishedAt: now,
+		}
+
+		err = examScoreRepo.Create(ctx, score)
+		if err != nil {
+			return err
+		}
+
+		return nil
 	})
 }
 

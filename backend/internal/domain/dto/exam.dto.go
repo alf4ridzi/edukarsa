@@ -52,3 +52,10 @@ type ExamUpdateRequest struct {
 	Duration *int    `json:"duration"`
 	Status   *string `json:"status"`
 }
+
+type ExamScoreResult struct {
+	Correct    int
+	Wrong      int
+	Score      int
+	UnAnswered int
+}

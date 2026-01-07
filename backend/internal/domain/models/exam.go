@@ -89,7 +89,7 @@ type ExamSubmission struct {
 	ID uuid.UUID `gorm:"primaryKey;type:uuid;default:gen_random_uuid()" json:"id"`
 
 	ExamID uuid.UUID `gorm:"type:uuid;index;not null"`
-	UserID uint      `gorm:"index;not null"`
+	UserID uint      `gorm:"not null"`
 
 	StartAt     time.Time
 	SubmittedAt *time.Time
@@ -109,9 +109,10 @@ type ExamScore struct {
 	UserID uint  `gorm:"not null;uniqueIndex:uq_exam_user_score"`
 	User   *User `gorm:"foreignKey:UserID"`
 
-	Correct int `gorm:"not null"`
-	Wrong   int `gorm:"not null"`
-	Score   int `gorm:"not null"`
+	Correct    int `gorm:"not null"`
+	Wrong      int `gorm:"not null"`
+	Score      int `gorm:"not null"`
+	UnAnswered int `gorm:"not null"`
 
 	FinishedAt time.Time `gorm:"not null"`
 

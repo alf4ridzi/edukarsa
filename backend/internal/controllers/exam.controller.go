@@ -23,6 +23,10 @@ func NewExamController(service services.ExamService) *ExamController {
 	return &ExamController{service: service}
 }
 
+func (c *ExamController) GetExamResults(ctx *gin.Context) {
+
+}
+
 func (c *ExamController) UpdateExam(ctx *gin.Context) {
 	examID, err := uuid.Parse(ctx.Param("id"))
 	if err != nil {
