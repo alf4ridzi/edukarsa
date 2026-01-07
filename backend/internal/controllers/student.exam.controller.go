@@ -49,6 +49,8 @@ func (c *StudentExamController) SubmitExam(ctx *gin.Context) {
 			helpers.ResponseJSON(ctx, http.StatusForbidden, false, err.Error(), nil)
 		case errors.Is(err, domain.ErrExamNotStarted):
 			helpers.ResponseJSON(ctx, http.StatusForbidden, false, err.Error(), nil)
+		case errors.Is(err, gorm.ErrRecordNotFound):
+			helpers.ResponseJSON(ctx, http.StatusNotFound, false, "ujian tidak ditemukan", nil)
 		default:
 			log.Println(err)
 			helpers.InternalServerError(ctx, "internal server error")
