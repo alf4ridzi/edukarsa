@@ -3,10 +3,13 @@ package controllers
 import (
 	"edukarsa-backend/internal/helpers"
 	"edukarsa-backend/internal/services"
+	"errors"
 	"log"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 type StudentClassessController struct {
@@ -27,6 +30,8 @@ func (c *StudentClassessController) GetExams(ctx *gin.Context) {
 	exams, err := c.studentClassessService.GetExams(ctx.Request.Context(), classID)
 	if err != nil {
 		switch {
+		case errors.Is(err, gorm.ErrRecordNotFound):
+			helpers.ResponseJSON(ctx, http.StatusNotFound, false, "kelas tidak ditemukan", nil)
 		default:
 			log.Println(err)
 			helpers.InternalServerError(ctx, "internal server error")

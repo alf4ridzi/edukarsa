@@ -79,6 +79,14 @@ func (s *studentExamServiceImpl) SubmitExam(ctx context.Context, examID uuid.UUI
 		return domain.ErrInvalidSubmissionStatus
 	}
 
+	now := time.Now().UTC()
+
+	endTime := submission.StartAt.Add(time.Duration(exam.Duration) * time.Minute)
+
+	if now.After(endTime) {
+		return domain.ErrExamDurationExceeded
+	}
+
 	return s.DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		examSubmissionRepo := repositories.NewExamSubmissionRepo(tx)
 

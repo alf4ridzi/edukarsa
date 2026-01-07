@@ -51,6 +51,8 @@ func (c *StudentExamController) SubmitExam(ctx *gin.Context) {
 			helpers.ResponseJSON(ctx, http.StatusForbidden, false, err.Error(), nil)
 		case errors.Is(err, gorm.ErrRecordNotFound):
 			helpers.ResponseJSON(ctx, http.StatusNotFound, false, "ujian tidak ditemukan", nil)
+		case errors.Is(err, domain.ErrExamDurationExceeded):
+			helpers.ResponseJSON(ctx, http.StatusForbidden, false, err.Error(), nil)
 		default:
 			log.Println(err)
 			helpers.InternalServerError(ctx, "internal server error")
@@ -86,7 +88,10 @@ func (c *StudentExamController) StartExam(ctx *gin.Context) {
 			helpers.ResponseJSON(ctx, http.StatusConflict, false, err.Error(), nil)
 		case errors.Is(err, domain.ErrUserExamNotStarted):
 			helpers.ResponseJSON(ctx, http.StatusConflict, false, err.Error(), nil)
+		case errors.Is(err, domain.ErrExamNotAccessible):
+			helpers.ResponseJSON(ctx, http.StatusForbidden, false, err.Error(), nil)
 		default:
+			log.Println(err)
 			helpers.InternalServerError(ctx, "internal server error")
 		}
 		return
@@ -132,13 +137,17 @@ func (c *StudentExamController) AnswerQuestion(ctx *gin.Context) {
 	if err != nil {
 		switch {
 		case errors.Is(err, domain.ErrOptionNotBelongToQuestion):
-			helpers.ResponseJSON(ctx, http.StatusInternalServerError, false, err.Error(), nil)
+			helpers.ResponseJSON(ctx, http.StatusConflict, false, err.Error(), nil)
 		case errors.Is(err, domain.ErrSameAnswerSubmitted):
-			helpers.ResponseJSON(ctx, http.StatusInternalServerError, false, err.Error(), nil)
+			helpers.ResponseJSON(ctx, http.StatusConflict, false, err.Error(), nil)
 		case errors.Is(err, domain.ErrQuestionNotBelongToExam):
-			helpers.ResponseJSON(ctx, http.StatusInternalServerError, false, err.Error(), nil)
+			helpers.ResponseJSON(ctx, http.StatusConflict, false, err.Error(), nil)
 		case errors.Is(err, domain.ErrUserExamNotStarted):
 			helpers.ResponseJSON(ctx, http.StatusConflict, false, err.Error(), nil)
+		case errors.Is(err, domain.ErrExamAlreadySubmitted):
+			helpers.ResponseJSON(ctx, http.StatusConflict, false, err.Error(), nil)
+		case errors.Is(err, gorm.ErrRecordNotFound):
+			helpers.ResponseJSON(ctx, http.StatusForbidden, false, "ujian belum dimulai oleh user", nil)
 		default:
 			log.Println(err)
 			helpers.InternalServerError(ctx, "internal server error")

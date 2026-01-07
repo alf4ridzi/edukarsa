@@ -26,6 +26,7 @@ var (
 	ErrUserExamNotStarted   = errors.New("ujian belum dimulai oleh user")
 	ErrExamAlreadySubmitted = errors.New("ujian sudah disubmit")
 	ErrExamExpired          = errors.New("ujian expired")
+	ErrExamDurationExceeded = errors.New("durasi ujian sudah berakhir")
 	// error submission
 	ErrInvalidSubmissionStatus = errors.New("invalid status submit")
 	ErrSubmissionNotStarted    = errors.New("tidak dapat submit karena belum dimulai")
